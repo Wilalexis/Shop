@@ -1,0 +1,40 @@
+/* estilos de las imagenes que estan adentro de la tabla*/
+.content {
+    min-height: calc(100vh - [altura del footer] - [altura de la barra de navegación]);
+}
+
+/* barrra */
+.navbar {
+    background-color: #A3DAAC; /* Cambia este color al que desees */
+}
+
+.navbar a.navbar-brand {
+    color: #576359; /* Cambia el color del texto en la barra de navegación */
+}
+
+.navbar a.nav-link {
+    color: black; /* Cambia el color del texto de los enlaces */
+}
+/* footer*/
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+.footer {
+    background-color: #A3DAAC;
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+
+    bottom: 0;
+}

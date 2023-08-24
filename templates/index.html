@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Bienvenido a Shop Rodas</h1>
+    <p class="lead">Explora nuestra colección de moda.</p>
+
+
+</div>
+<div class="container">
+    <table class="table">
+        <tr>
+            <td>
+                <a href="#" class="image-button">
+                    <div class="image-text">Cátalogo</div>
+                    <img src="{{ url_for('static', filename='img/catalogo.png') }}" alt="Hombres">
+                </a>
+            </td>
+            <td>
+                <a href="#" class="image-button">
+                     <div class="image-text">Comprar</div>
+                    <img src="{{ url_for('static', filename='img/carrito-de-compras.png') }}" alt="Mujeres">
+                </a>
+            </td>
+            <td>
+                <a href="#" class="image-button">
+                    <div class="image-text">Rastrear envios</div>
+                    <img src="{{ url_for('static', filename='img/envio.png') }}" alt="Ofertas">
+                </a>
+            </td>
+        </tr>
+        <!-- Puedes agregar más filas aquí si es necesario -->
+    </table>
+</div>
+{% endblock %}
+
+{% block footer %}
+<p>&copy; 2023 Shop Rodas. Todos los derechos reservados.</p>
+{% endblock %}
