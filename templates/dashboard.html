@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Dashboard del Administrador</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <a href="{{ url_for('users') }}" class="btn btn-primary">Gestionar Usuarios</a>
+        </div>
+        <div class="col-md-6">
+            <a href="{{ url_for('products') }}" class="btn btn-primary">Gestionar Productos</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

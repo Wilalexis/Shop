@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Gestión de Productos</h2>
+    <a href="#" class="btn btn-success">Nuevo Producto</a><br><br>
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Producto</th>
+                <th>Descripción</th>
+                <th>Talla</th>
+                <th>Categoria</th>
+                <th>Precio</th>
+                <th>Existencia</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos %}
+            <tr>
+                <td>{{ producto[1] }}</td>
+                <td>{{ producto[2] }}</td>
+                <td>{{ producto[3] }}</td>
+                <td>{{ producto[4] }}</td>
+                <td>Q. {{ producto[5] }}</td>
+                <td>{{ producto[6] }}</td>
+
+                <td>
+                    <a href="#" class="btn btn-info btn-sm">Editar</a>
+                    <a href="#" class="btn btn-danger btn-sm">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
