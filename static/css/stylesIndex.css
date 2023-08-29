@@ -37,7 +37,7 @@
     text-decoration: none; /* Quita la línea de decoración */
 }
 /* tabala */
-.table {
+.index-table {
     width: 100%;
     border-collapse: collapse;
     background-color: #D8F0DC; /* Color de fondo de la tabla */

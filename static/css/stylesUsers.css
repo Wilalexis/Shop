@@ -4,5 +4,17 @@
 }
 
 .btn {
-    margin-right: 10px;
+    margin-right: 10 px;
+}
+ .usuarios-table{
+    background-color: none;
+ }
+
+.usuarios-table th,
+.usuarios-table td {
+    text-align: center; /* Centrar el texto en celdas */
+}
+
+.show-password {
+    cursor: pointer;
 }
