@@ -15,6 +15,7 @@
     text-align: center; /* Centrar el texto en celdas */
 }
 
-.show-password {
-    cursor: pointer;
+.fa-eye-slash::before {
+    content: "\f070"; /* Código Unicode para el ícono de línea diagonal */
 }
+

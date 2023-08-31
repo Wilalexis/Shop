@@ -1,18 +1,10 @@
 {% extends 'base.html' %}
 
-{% block styles %}
-<style>
-
-    .show-password {
-        cursor: pointer;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="container">
     <h2>Gestión de Usuarios</h2>
-    <a href="#" class="btn btn-success ">Nuevo Usuario</a><br><br>
+    <a href="#" class="btn btn-success" data-toggle="modal" data-target="#nuevoUsuarioModal">Nuevo Usuario</a>
+    <br><br>
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-hover usuarios-table">
             <thead class="thead-dark">
@@ -30,36 +22,131 @@
                     <td>{{ usuario[1] }}</td>
                     <td>{{ usuario[2] }}</td>
                     <td>
-                        <span class="text" data-original-password="{{ usuario[3] }}">••••••••</span>
+                        <span class="password">{{ '•' * 8 }}</span>
                         <i class="fas fa-eye show-password"></i>
-                    </td>
+                    </td>                   
                     <td>{{ usuario[4] }}</td>
                     <td>
-                        <a href="#" class="btn btn-info btn-sm"><img src="{{ url_for('static', filename='img/edit.png') }}" alt="Login" width="25" height="25"></a>
-                        <a href="#" class="btn btn-danger btn-sm"><img src="{{ url_for('static', filename='img/remove-user.png') }}" alt="Login" width="25" height="25"></a>
+                        <a href="#" class="btn btn-info btn-sm"><img src="{{ url_for('static', filename='img/edit.png') }}" alt="Editar" width="25" height="25"></a>
+                        <a href="#" class="btn btn-danger btn-sm"><img src="{{ url_for('static', filename='img/remove-user.png') }}" alt="Eliminar" width="25" height="25"></a>
                     </td>
                 </tr>
-                {% endfor %}
+                
             </tbody>
         </table>
     </div>
 </div>
-{% endblock %}
+<!-- Aquí empieza la ventana modal-->
+<div class="modal fade" id="nuevoUsuarioModal" tabindex="-1" role="dialog" aria-labelledby="nuevoUsuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="nuevoUsuarioModalLabel">
+                    <i class="fas fa-user-plus mr-2"></i> Nuevo Usuario
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="nombre"><i class="fas fa-user"></i> Nombre:</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="correo"><i class="fas fa-envelope"></i> Correo Electrónico:</label>
+                        <input type="email" class="form-control" id="correo" name="correo" required>
+                        <small id="correo-error" class="form-text text-danger"></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contrasena"><i class="fas fa-lock"></i> Contraseña:</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="contrasena" name="contrasena" required>
+                            <div class="input-group-append">
+                                <span class="input-group-text bg-transparent border-0 toggle-password">
+                                    <i class="fas fa-eye-slash show-password-icon" style="cursor: pointer;"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
 
-{% block scripts %}
+                    <div class="form-group">
+                        <label for="rol"><i class="fas fa-user-tag"></i> Rol:</label>
+                        <select class="form-control" id="rol" name="rol" required>
+                            <option value="admin">Administrador</option>
+                            <option value="usuario">Usuario</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Aquí termina la ventana modal-->
+
 <script>
+    //Funcion para mostrar la contraseña en la tabla usuarios
     const showPasswordButtons = document.querySelectorAll('.show-password');
     showPasswordButtons.forEach(button => {
         button.addEventListener('click', () => {
             const passwordCell = button.parentNode.querySelector('.password');
-            const originalPassword = passwordCell.dataset.text;
+            const realPassword = '{{ usuario[3] }}'; // Reemplaza por la contraseña real
+
             passwordCell.classList.toggle('show');
             if (passwordCell.classList.contains('show')) {
-                passwordCell.textContent = originalPassword;
+                passwordCell.textContent = realPassword;
+                button.classList.remove('fa-eye');
+                button.classList.add('fa-eye-slash');
             } else {
                 passwordCell.textContent = '••••••••';
+                button.classList.remove('fa-eye-slash');
+                button.classList.add('fa-eye');
             }
         });
     });
+    //Funcion para mostrar la contraseña en el formulario para ingresar en la tabala usuarios
+    const togglePassword = document.querySelector('.toggle-password');
+    const passwordField = togglePassword.closest('.input-group').querySelector('input');
+    const showPasswordIcon = togglePassword.querySelector('.show-password-icon');
+
+    togglePassword.addEventListener('click', () => {
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            showPasswordIcon.classList.remove('fa-eye-slash');
+            showPasswordIcon.classList.add('fa-eye');
+        } else {
+            passwordField.type = 'password';
+            showPasswordIcon.classList.remove('fa-eye');
+            showPasswordIcon.classList.add('fa-eye-slash');
+        }
+    });
+    //Funcion para validar el correo electronico
+    const correoInput = document.getElementById('correo');
+    const correoError = document.getElementById('correo-error');
+
+    correoInput.addEventListener('input', () => {
+        if (correoInput.validity.valid) {
+            correoError.textContent = '';
+        } else {
+            mostrarErrorCorreo();
+        }
+    });
+
+    function mostrarErrorCorreo() {
+        if (correoInput.validity.valueMissing) {
+            correoError.textContent = 'Debes ingresar un correo electrónico.';
+        } else if (correoInput.validity.typeMismatch) {
+            correoError.textContent = 'Ingresa un formato de correo electrónico válido.';
+        }
+    }
 </script>
+{% endfor %}
 {% endblock %}
+
