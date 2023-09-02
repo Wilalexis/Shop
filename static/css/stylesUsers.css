@@ -15,6 +15,14 @@
     text-align: center; /* Centrar el texto en celdas */
 }
 
+.usuarios-table td {
+    word-break: break-word;
+    max-width: 100px; /* Ajusta según tus necesidades */
+    white-space: nowrap; /* Evita el salto de línea en las celdas */
+    overflow: hidden; /* Evita que el contenido sobresalga */
+    text-overflow: ellipsis; /* Agrega puntos suspensivos si el contenido es muy largo */
+}
+
 .fa-eye-slash::before {
     content: "\f070"; /* Código Unicode para el ícono de línea diagonal */
 }

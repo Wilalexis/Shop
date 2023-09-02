@@ -6,7 +6,17 @@
     <a href="#" class="btn btn-success" data-toggle="modal" data-target="#nuevoUsuarioModal">Nuevo Usuario</a>
     <br><br>
     <div class="table-responsive">
-        <table class="table table-bordered table-striped table-hover usuarios-table">
+        
+        {% if 'mensaje' in session %}
+<div id="mensaje-exito" class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ session.pop('mensaje') }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endif %}
+        
+<table class="table table-bordered table-striped table-hover usuarios-table">
             <thead class="thead-dark">
                 <tr>
                     <th>Nombre</th>
@@ -31,7 +41,14 @@
                         <a href="#" class="btn btn-danger btn-sm"><img src="{{ url_for('static', filename='img/remove-user.png') }}" alt="Eliminar" width="25" height="25"></a>
                     </td>
                 </tr>
+
+                <script>
+                    //Funcion para mostrar la contraseña en la tabla usuarios
+                    
+                </script>
                 
+
+                {% endfor %}
             </tbody>
         </table>
     </div>
@@ -49,7 +66,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form>
+                <form action="{{ url_for('crear_usuario') }}" method="POST">
+                    
                     <div class="form-group">
                         <label for="nombre"><i class="fas fa-user"></i> Nombre:</label>
                         <input type="text" class="form-control" id="nombre" name="nombre" required>
@@ -75,78 +93,22 @@
                     <div class="form-group">
                         <label for="rol"><i class="fas fa-user-tag"></i> Rol:</label>
                         <select class="form-control" id="rol" name="rol" required>
-                            <option value="admin">Administrador</option>
-                            <option value="usuario">Usuario</option>
+                            <option value="1">Administrador</option>
+                            <option value="2">Usuario</option>
                         </select>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary">
+                    <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" >
                     <i class="fas fa-check"></i> Guardar
                 </button>
             </div>
+                </form>
+            </div>
+
         </div>
     </div>
 </div>
 <!-- Aquí termina la ventana modal-->
 
-<script>
-    //Funcion para mostrar la contraseña en la tabla usuarios
-    const showPasswordButtons = document.querySelectorAll('.show-password');
-    showPasswordButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const passwordCell = button.parentNode.querySelector('.password');
-            const realPassword = '{{ usuario[3] }}'; // Reemplaza por la contraseña real
-
-            passwordCell.classList.toggle('show');
-            if (passwordCell.classList.contains('show')) {
-                passwordCell.textContent = realPassword;
-                button.classList.remove('fa-eye');
-                button.classList.add('fa-eye-slash');
-            } else {
-                passwordCell.textContent = '••••••••';
-                button.classList.remove('fa-eye-slash');
-                button.classList.add('fa-eye');
-            }
-        });
-    });
-    //Funcion para mostrar la contraseña en el formulario para ingresar en la tabala usuarios
-    const togglePassword = document.querySelector('.toggle-password');
-    const passwordField = togglePassword.closest('.input-group').querySelector('input');
-    const showPasswordIcon = togglePassword.querySelector('.show-password-icon');
-
-    togglePassword.addEventListener('click', () => {
-        if (passwordField.type === 'password') {
-            passwordField.type = 'text';
-            showPasswordIcon.classList.remove('fa-eye-slash');
-            showPasswordIcon.classList.add('fa-eye');
-        } else {
-            passwordField.type = 'password';
-            showPasswordIcon.classList.remove('fa-eye');
-            showPasswordIcon.classList.add('fa-eye-slash');
-        }
-    });
-    //Funcion para validar el correo electronico
-    const correoInput = document.getElementById('correo');
-    const correoError = document.getElementById('correo-error');
-
-    correoInput.addEventListener('input', () => {
-        if (correoInput.validity.valid) {
-            correoError.textContent = '';
-        } else {
-            mostrarErrorCorreo();
-        }
-    });
-
-    function mostrarErrorCorreo() {
-        if (correoInput.validity.valueMissing) {
-            correoError.textContent = 'Debes ingresar un correo electrónico.';
-        } else if (correoInput.validity.typeMismatch) {
-            correoError.textContent = 'Ingresa un formato de correo electrónico válido.';
-        }
-    }
-</script>
-{% endfor %}
 {% endblock %}
 

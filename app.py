@@ -1,7 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, session,flash, redirect, url_for
 import cx_Oracle
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+app.secret_key = 'admin'  # clave secreta
 
 # Configura la conexión a Oracle
 dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
@@ -43,6 +44,27 @@ def products():
     productos = cursor.fetchall()
     cursor.close()
     return render_template('products.html',productos=productos)
+
+@app.route('/crear_usuario', methods=['POST']) # Ruta para insertar a Oracle los datos de usuario
+def crear_usuario():
+    nombre = request.form.get('nombre')
+    correo = request.form.get('correo')
+    contrasena = request.form.get('contrasena')
+    rol = request.form.get('rol')
+
+    # Preparar la consulta SQL
+    sql = "INSERT INTO usuarios (nombre, correo, contrasena, rol) VALUES (:nombre, :correo, :contrasena, :rol)"
+
+    # Ejecutar la consulta
+    cursor = connection.cursor()
+    cursor.execute(sql, {'nombre': nombre, 'correo': correo, 'contrasena': contrasena, 'rol': rol})
+    connection.commit()
+
+    #variable de sesion
+    session['mensaje'] = 'Usuario agregado correctamente'   
+
+    return redirect(url_for('users'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
