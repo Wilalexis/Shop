@@ -1,4 +1,8 @@
 from flask import Flask, render_template, request, session,flash, redirect, url_for
+from flask_wtf import FlaskForm
+from wtforms import HiddenField
+from flask_paginate import Pagination, get_page_args
+from flask_bootstrap import Bootstrap
 import cx_Oracle
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -7,6 +11,9 @@ app.secret_key = 'admin'  # clave secreta
 # Configura la conexión a Oracle
 dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
 connection = cx_Oracle.connect(user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+class DeleteForm(FlaskForm):
+    _method = HiddenField()
 
 #Rutas
 @app.route('/')
@@ -35,7 +42,25 @@ def users():
     cursor.execute("SELECT * FROM usuarios")
     usuarios = cursor.fetchall()
     cursor.close()
-    return render_template('users.html',usuarios=usuarios)
+    
+    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+    page = request.args.get('page', type=int, default=1)
+    per_page = request.args.get('per_page', type=int, default=5)
+    
+    # Supongamos que tienes una lista de usuarios llamada 'usuarios'
+    total_users = len(usuarios)
+    
+    # Calcula el índice de inicio y final para la página actual
+    start = (page - 1) * per_page
+    end = start + per_page
+    
+    # Obtiene los usuarios para la página actual
+    users_to_display = usuarios[start:end]
+
+    # Crea un objeto de paginación
+    pagination = Pagination(page=page, per_page=per_page, total=total_users, css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
+
+    return render_template('users.html', usuarios=users_to_display, pagination=pagination)
 
 @app.route('/admin/products')# Ruta para la página de productos
 def products():
@@ -62,6 +87,22 @@ def crear_usuario():
 
     #variable de sesion
     session['mensaje'] = 'Usuario agregado correctamente'   
+
+    return redirect(url_for('users'))
+
+@app.route('/eliminar_usuario/<int:ID_USUARIOS>', methods=['POST', 'DELETE'])
+def eliminar_usuario(ID_USUARIOS):
+    if request.method == 'POST' or request.form.get('_method') == 'DELETE':
+        # Lógica para eliminar el usuario de la base de datos Oracle
+        try:
+            cursor = connection.cursor()
+            cursor.execute("DELETE FROM USUARIOS WHERE ID_USUARIOS = :ID_USUARIOS", {'ID_USUARIOS': ID_USUARIOS})
+            connection.commit()
+            flash('Usuario eliminado con éxito', 'success')
+        except Exception as e:
+            flash('Error al eliminar el usuario', 'danger')
+        finally:
+            cursor.close()
 
     return redirect(url_for('users'))
 

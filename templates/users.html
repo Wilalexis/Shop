@@ -8,15 +8,23 @@
     <div class="table-responsive">
         
         {% if 'mensaje' in session %}
-<div id="mensaje-exito" class="alert alert-success alert-dismissible fade show" role="alert">
-    {{ session.pop('mensaje') }}
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-{% endif %}
+        <div id="mensaje-exito" class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session.pop('mensaje') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endif %}
         
-<table class="table table-bordered table-striped table-hover usuarios-table">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-{{ messages[0] }}" role="alert">
+            {{ messages[1] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <table class="table table-bordered table-striped table-hover usuarios-table">
             <thead class="thead-dark">
                 <tr>
                     <th>Nombre</th>
@@ -36,23 +44,36 @@
                         <i class="fas fa-eye show-password"></i>
                     </td>                   
                     <td>{{ usuario[4] }}</td>
-                    <td>
-                        <a href="#" class="btn btn-info btn-sm"><img src="{{ url_for('static', filename='img/edit.png') }}" alt="Editar" width="25" height="25"></a>
-                        <a href="#" class="btn btn-danger btn-sm"><img src="{{ url_for('static', filename='img/remove-user.png') }}" alt="Eliminar" width="25" height="25"></a>
+                    <td >
+                        <div  class="button-container text-center" >
+                            <form action="{{ url_for('eliminar_usuario', ID_USUARIOS=usuario[0]) }}" method="POST">
+                            
+                            <a href="#" class="btn btn-info btn-sm"><img src="{{ url_for('static', filename='img/edit.png') }}" alt="Editar" width="25" height="25"></a>
+                            
+                            
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <img src="{{ url_for('static', filename='img/remove-user.png') }}" alt="Eliminar" width="25" height="25">
+                                </button>
+                            </form>
+                        </div>
+
                     </td>
                 </tr>
-
-                <script>
-                    //Funcion para mostrar la contraseña en la tabla usuarios
-                    
-                </script>
-                
-
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<!-- Mostrar los botones de paginación -->
+<div class="pagination">
+    {{ pagination.info }}
+    {{ pagination.links }}
+</div>
+
+
+
 <!-- Aquí empieza la ventana modal-->
 <div class="modal fade" id="nuevoUsuarioModal" tabindex="-1" role="dialog" aria-labelledby="nuevoUsuarioModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -111,4 +132,3 @@
 <!-- Aquí termina la ventana modal-->
 
 {% endblock %}
-
