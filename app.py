@@ -106,6 +106,105 @@ def eliminar_usuario(ID_USUARIO):
 
     return redirect(url_for('users'))
 
+@app.route('/buscar_usuarios', methods=['POST'])
+def buscar_usuarios():
+    campo_busqueda = request.form.get('campo_busqueda')
+    valor_busqueda = request.form.get('valor_busqueda')
+
+    # Consulta SQL parametrizada
+    query = "SELECT * FROM usuarios WHERE 1=1"
+
+    # Crear un diccionario de parámetros vacío
+    params = {}
+
+    if campo_busqueda == "nombre" and valor_busqueda:
+        query += " AND nombre LIKE :nombre"
+        params['nombre'] = f'%{valor_busqueda}%'
+    elif campo_busqueda == "correo" and valor_busqueda:
+        query += " AND correo LIKE :correo"
+        params['correo'] = f'%{valor_busqueda}%'
+
+    # Ejecutar la consulta y obtener los resultados
+    cursor = connection.cursor()
+    cursor.execute(query, params)
+    usuarios_encontrados = cursor.fetchall()
+    cursor.close()
+
+    # Renderizar la página de resultados de búsqueda con los usuarios encontrados
+    return render_template('resultadosBusquedaUsuario.html', usuarios=usuarios_encontrados)
+
+@app.route('/editUsers/<int:ID_USUARIOS>', methods=['GET', 'POST'])
+def editUsers(ID_USUARIOS):
+    if request.method == 'GET':
+        try:
+            # Realiza la conexión a tu base de datos Oracle
+            dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
+            connection = cx_Oracle.connect(user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+            # Crea un cursor
+            cursor = connection.cursor()
+
+            # Consulta SQL para obtener los datos del usuario por su ID
+            query = "SELECT ID_USUARIOS, nombre, correo, contrasena, rol FROM usuarios WHERE ID_USUARIOS = :id_usuario"
+
+            # Ejecuta la consulta con el ID_USUARIOS como parámetro
+            cursor.execute(query, id_usuario=ID_USUARIOS)
+
+            # Obtiene los datos del usuario
+            usuario = cursor.fetchone()
+
+            # Cierra el cursor y la conexión
+            cursor.close()
+            connection.close()
+
+            if usuario is None:
+                # Manejar el caso en el que no se encuentra el usuario
+                flash('Usuario no encontrado', 'danger')
+                return redirect(url_for('users'))  # Redirige a la página de usuarios
+
+            return render_template('editUsers.html', usuario=usuario)
+
+        except Exception as e:
+            print("Error al obtener el usuario:", str(e))
+            flash('Error al obtener el usuario', 'danger')
+            return redirect(url_for('users'))  # Redirige a la página de usuarios
+
+    elif request.method == 'POST':
+        try:
+            # Realiza la conexión a tu base de datos Oracle
+            dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
+            connection = cx_Oracle.connect(user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+            # Crea un cursor
+            cursor = connection.cursor()
+
+            # Procesar el formulario de edición y actualizar los datos en la base de datos
+            nombre = request.form.get('nombre')
+            correo = request.form.get('correo')
+            contrasena = request.form.get('contrasena')
+            rol = request.form.get('rol')
+
+            # Consulta SQL para actualizar los datos del usuario
+            query = "UPDATE usuarios SET nombre = :nombre, correo = :correo, contrasena = :contrasena, rol = :rol WHERE ID_USUARIOS = :id_usuario"
+
+            # Ejecuta la consulta con los nuevos valores y el ID_USUARIOS como parámetro
+            cursor.execute(query, nombre=nombre, correo=correo, contrasena=contrasena, rol=rol, id_usuario=ID_USUARIOS)
+
+            # Confirma la transacción
+            connection.commit()
+
+            # Cierra el cursor y la conexión
+            cursor.close()
+            connection.close()
+
+            flash('Usuario actualizado con éxito', 'success')
+            return redirect(url_for('users'))  # Redirige de nuevo a la página de usuarios
+
+        except Exception as e:
+            print("Error al actualizar el usuario:", str(e))
+            flash('Error al actualizar el usuario', 'danger')
+            return redirect(url_for('users'))  # Redirige a la página de usuarios
+
 
 if __name__ == '__main__':
     app.run(debug=True)
