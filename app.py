@@ -39,7 +39,7 @@ def dashboard():
 @app.route('/admin/users')# Ruta para la página de usuarios
 def users():
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM usuarios")
+    cursor.execute("SELECT U.ID_USUARIO, U.NOMBRE, U.CORREO, U.CONTRASENA, R.NOMBRE_ROL FROM USUARIOS U JOIN ROLES R ON U.ID_ROL = R.ID_ROL")
     usuarios = cursor.fetchall()
     cursor.close()
     
@@ -75,14 +75,14 @@ def crear_usuario():
     nombre = request.form.get('nombre')
     correo = request.form.get('correo')
     contrasena = request.form.get('contrasena')
-    rol = request.form.get('rol')
+    id_rol = request.form.get('id_rol')
 
     # Preparar la consulta SQL
-    sql = "INSERT INTO usuarios (nombre, correo, contrasena, rol) VALUES (:nombre, :correo, :contrasena, :rol)"
+    sql = "INSERT INTO usuarios (nombre, correo, contrasena, id_rol) VALUES (:nombre, :correo, :contrasena, :id_rol)"
 
     # Ejecutar la consulta
     cursor = connection.cursor()
-    cursor.execute(sql, {'nombre': nombre, 'correo': correo, 'contrasena': contrasena, 'rol': rol})
+    cursor.execute(sql, {'nombre': nombre, 'correo': correo, 'contrasena': contrasena, 'id_rol': id_rol})
     connection.commit()
 
     #variable de sesion
@@ -90,13 +90,13 @@ def crear_usuario():
 
     return redirect(url_for('users'))
 
-@app.route('/eliminar_usuario/<int:ID_USUARIOS>', methods=['POST', 'DELETE'])
-def eliminar_usuario(ID_USUARIOS):
+@app.route('/eliminar_usuario/<int:ID_USUARIO>', methods=['POST', 'DELETE'])
+def eliminar_usuario(ID_USUARIO):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
         # Lógica para eliminar el usuario de la base de datos Oracle
         try:
             cursor = connection.cursor()
-            cursor.execute("DELETE FROM USUARIOS WHERE ID_USUARIOS = :ID_USUARIOS", {'ID_USUARIOS': ID_USUARIOS})
+            cursor.execute("DELETE FROM USUARIOS WHERE ID_USUARIO = :ID_USUARIO", {'ID_USUARIO': ID_USUARIO})
             connection.commit()
             flash('Usuario eliminado con éxito', 'success')
         except Exception as e:

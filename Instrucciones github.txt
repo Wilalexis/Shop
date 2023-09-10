@@ -26,5 +26,5 @@ git commit -m "segundo comentario"
 git push -u origin main
 
 -----Actualizar repositorio
-git push 
+git pull
 

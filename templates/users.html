@@ -46,7 +46,7 @@
                     <td>{{ usuario[4] }}</td>
                     <td >
                         <div  class="button-container text-center" >
-                            <form action="{{ url_for('eliminar_usuario', ID_USUARIOS=usuario[0]) }}" method="POST">
+                            <form action="{{ url_for('eliminar_usuario', ID_USUARIO=usuario[0]) }}" method="POST">
                             
                             <a href="#" class="btn btn-info btn-sm"><img src="{{ url_for('static', filename='img/edit.png') }}" alt="Editar" width="25" height="25"></a>
                             
@@ -71,8 +71,6 @@
     {{ pagination.info }}
     {{ pagination.links }}
 </div>
-
-
 
 <!-- Aquí empieza la ventana modal-->
 <div class="modal fade" id="nuevoUsuarioModal" tabindex="-1" role="dialog" aria-labelledby="nuevoUsuarioModalLabel" aria-hidden="true">
@@ -113,7 +111,7 @@
 
                     <div class="form-group">
                         <label for="rol"><i class="fas fa-user-tag"></i> Rol:</label>
-                        <select class="form-control" id="rol" name="rol" required>
+                        <select class="form-control" id="id_rol" name="id_rol" required>
                             <option value="1">Administrador</option>
                             <option value="2">Usuario</option>
                         </select>
