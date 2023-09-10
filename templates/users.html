@@ -66,13 +66,10 @@
                         <div  class="button-container text-center" >
                             <form action="{{ url_for('eliminar_usuario', ID_USUARIO=usuario[0]) }}" method="POST">
                             
-                            <a href="#" class="btn btn-info btn-sm"><img src="{{ url_for('static', filename='img/edit.png') }}" alt="Editar" width="25" height="25"></a>
-                            
-                            
                         <div  class="button-container text-center" >                                                                                                      
-                            <form action="{{ url_for('eliminar_usuario', ID_USUARIOS=usuario[0]) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">                                                                                    
+                            <form action="{{ url_for('eliminar_usuario', ID_USUARIO=usuario[0]) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">                                                                                    
                                 <!-- Botón Modificar -->
-                                <a href="{{ url_for('editUsers', ID_USUARIOS=usuario[0]) }}" class="btn btn-info btn-sm">
+                                <a href="{{ url_for('editUsers', ID_USUARIO=usuario[0]) }}" class="btn btn-info btn-sm">
                                     <img src="{{ url_for('static', filename='img/edit.png') }}" alt="Editar" width="25" height="25">
                                 </a>                                                                                    
                                 <!-- Botón Eliminar -->                            
@@ -110,7 +107,7 @@
             </div>
             <div class="modal-body">
                 <!-- Aquí puedes agregar un formulario para editar los datos del usuario -->
-                <form action="{{ url_for('editUsers', ID_USUARIOS=usuario[0]) }}" method="POST">
+                <form action="{{ url_for('editUsers', ID_USUARIO=usuario[0]) }}" method="POST">
                     <!-- Campos de entrada para los datos del usuario -->
                     <div class="form-group">
                         <label for="nombre">Nombre</label>

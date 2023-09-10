@@ -133,8 +133,8 @@ def buscar_usuarios():
     # Renderizar la página de resultados de búsqueda con los usuarios encontrados
     return render_template('resultadosBusquedaUsuario.html', usuarios=usuarios_encontrados)
 
-@app.route('/editUsers/<int:ID_USUARIOS>', methods=['GET', 'POST'])
-def editUsers(ID_USUARIOS):
+@app.route('/editUsers/<int:ID_USUARIO>', methods=['GET', 'POST'])
+def editUsers(ID_USUARIO):
     if request.method == 'GET':
         try:
             # Realiza la conexión a tu base de datos Oracle
@@ -145,10 +145,10 @@ def editUsers(ID_USUARIOS):
             cursor = connection.cursor()
 
             # Consulta SQL para obtener los datos del usuario por su ID
-            query = "SELECT ID_USUARIOS, nombre, correo, contrasena, rol FROM usuarios WHERE ID_USUARIOS = :id_usuario"
+            query = "SELECT ID_USUARIO, nombre, correo, contrasena, id_rol FROM usuarios WHERE ID_USUARIO = :id_usuario"
 
-            # Ejecuta la consulta con el ID_USUARIOS como parámetro
-            cursor.execute(query, id_usuario=ID_USUARIOS)
+            # Ejecuta la consulta con el ID_USUARIO como parámetro
+            cursor.execute(query, id_usuario=ID_USUARIO)
 
             # Obtiene los datos del usuario
             usuario = cursor.fetchone()
@@ -182,13 +182,13 @@ def editUsers(ID_USUARIOS):
             nombre = request.form.get('nombre')
             correo = request.form.get('correo')
             contrasena = request.form.get('contrasena')
-            rol = request.form.get('rol')
+            id_rol = request.form.get('id_rol')
 
             # Consulta SQL para actualizar los datos del usuario
-            query = "UPDATE usuarios SET nombre = :nombre, correo = :correo, contrasena = :contrasena, rol = :rol WHERE ID_USUARIOS = :id_usuario"
+            query = "UPDATE usuarios SET nombre = :nombre, correo = :correo, contrasena = :contrasena, id_rol = :id_rol WHERE ID_USUARIO = :id_usuario"
 
-            # Ejecuta la consulta con los nuevos valores y el ID_USUARIOS como parámetro
-            cursor.execute(query, nombre=nombre, correo=correo, contrasena=contrasena, rol=rol, id_usuario=ID_USUARIOS)
+            # Ejecuta la consulta con los nuevos valores y el ID_USUARIO como parámetro
+            cursor.execute(query, nombre=nombre, correo=correo, contrasena=contrasena, id_rol=id_rol, id_usuario=ID_USUARIO)
 
             # Confirma la transacción
             connection.commit()
