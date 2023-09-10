@@ -55,5 +55,23 @@
     border-color: #007bff; /* Color del borde del enlace de la página activa */
     color: #fff; /* Color del texto del enlace de la página activa */
 }
+/*estilos de la barra de busqueda*/
+.custom-form {
+    background-color: #f0f0f0; /* Cambia el color de fondo del formulario */
+    border: 1px solid #ccc; /* Agrega un borde al formulario */
+    padding: 10px; /* Añade espaciado interno */
+    border-radius: 5px; /* Redondea los bordes */
+}
 
+/* Estilo para el botón */
+.btn-primary {
+    background-color: #007bff; /* Cambia el color de fondo del botón */
+    border-color: #007bff; /* Cambia el color del borde del botón */
+    color: #fff; /* Cambia el color del texto del botón */
+}
 
+/* Estilo para el botón al pasar el ratón por encima */
+.btn-primary:hover {
+    background-color: #0056b3; /* Cambia el color de fondo al pasar el ratón por encima */
+    border-color: #0056b3; /* Cambia el color del borde al pasar el ratón por encima */
+}
