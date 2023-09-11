@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Carrito de Compras</title>
+</head>
+<body>
+    <h1>Productos</h1>
+    <ul>
+        <li><a href="#">Producto 1</a></li>
+        <li><a href="#">Producto 2</a></li>
+        <li><a href="#">Producto 3</a></li>
+    </ul>
+
+    <h2>Carrito de Compras</h2>
+    <ul>
+        {% for producto_id in carrito %}
+            <li>Producto {{ producto_id }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="#">Vaciar Carrito</a>
+</body>
+</html>
