@@ -231,7 +231,7 @@ def editUsers(ID_USUARIO):
 @app.route('/admin/products')  # Ruta para la página de productos
 def products():
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM productos")
+    cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA")
     productos = cursor.fetchall()
     cursor.close()
     return render_template('products.html', productos=productos)
