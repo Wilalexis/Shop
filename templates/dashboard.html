@@ -1,15 +1,64 @@
-{% extends 'base.html' %}
+{% extends 'baseDashboard.html' %}
 
 {% block content %}
+<h1 id="saludo"></h1>
 <div class="container">
     <h2>Dashboard del Administrador</h2>
-    <div class="row">
-        <div class="col-md-6">
-            <a href="{{ url_for('users') }}" class="btn btn-primary">Gestionar Usuarios</a>
-        </div>
-        <div class="col-md-6">
-            <a href="{{ url_for('products') }}" class="btn btn-primary">Gestionar Productos</a>
-        </div>
-    </div>
+    <table class="table styled-table" style="border-collapse: collapse; border: 0; width: 100%;">
+        <tr>
+            <td>
+                <a href="{{ url_for('users') }}" class="btn btn-primary">
+                    <img src="/static/img/user.png" alt="Usuarios" width="50" height="50">
+                    Gestionar Usuarios
+                </a>
+            </td>
+            <td>
+                <a href="{{ url_for('products') }}" class="btn btn-primary">
+                    <img src="/static/img/products.png" alt="Productos" width="50" height="50">
+                    Gestionar Productos
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="#" class="btn btn-primary">
+                    <img src="/static/img/folder.png" alt="Categorías" width="50" height="50">
+                    Gestionar Categorías
+                </a>
+            </td>
+            <td>
+                <a href="#" class="btn btn-primary">
+                    <img src="/static/img/client.png" alt="Clientes" width="50" height="50">
+                    Gestionar Clientes
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="#" class="btn btn-primary">
+                    <img src="/static/img/brand.png" alt="Marcas" width="50" height="50">
+                    Gestionar Marcas
+                </a>
+            </td>
+            <td>
+                <a href="#" class="btn btn-primary">
+                    <img src="/static/img/payment.png" alt="Recibos" width="50" height="50">
+                    Gestionar Recibos
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a href="#" class="btn btn-primary">
+                    <img src="/static/img/size.png" alt="Tallas" width="50" height="50">
+                    Gestionar Tallas
+                </a>
+            </td>
+            <!-- Agrega más columnas y enlaces aquí según tus necesidades -->
+        </tr>
+    </table>
+    
+    
+    
 </div>
 {% endblock %}

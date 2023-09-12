@@ -1,0 +1,79 @@
+/*Estilos de la imagen de fondo*/
+body::before {
+    content: "";
+    background-image: url('/static/img/fondo.jpg');
+    background-repeat: repeat;
+    background-size: 400px 400px;
+    opacity: 0.1; /* Ajusta la opacidad según desees (0.0 - 1.0) */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Coloca el pseudo-elemento detrás del contenido */
+}
+/* Estilos para el menú lateral */
+.sidenav {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    right: -250px;
+    background-color: #333;
+    padding-top: 60px;
+    transition: 0.5s;
+}
+
+/* Estilos para los enlaces sin subrayado */
+.sidenav a {
+    padding: 15px 25px;
+    text-align: center;
+    text-decoration: none; /* Quita el subrayado */
+    font-size: 20px;
+    color: #fff;
+    display: block;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.sidenav a:hover {
+    text-decoration: none;
+    background-color: #007bff; /* Cambia el color de fondo al pasar el mouse */
+    color: #fff; /* Cambia el color del texto al pasar el mouse */
+}
+
+/* Estilos para el botón de menú */
+#menuBtn {
+    position: fixed;
+    right: 10px;
+    top: 10px;
+    font-size: 24px;
+    background-color: #333;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    z-index: 1;
+}
+
+/* Estilos para el contenido principal */
+#main {
+    transition: margin-right .5s;
+    padding: 16px;
+    margin-right: 0;
+    text-decoration: none;
+}
+/* Transición suave para el sidebar */
+.sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Clase para el sidebar abierto */
+.sidebar-open .sidebar {
+    transform: translateX(0);
+}
+
+/* Clase para el sidebar cerrado */
+.sidebar-closed .sidebar {
+    transform: translateX(-100%);
+}
+

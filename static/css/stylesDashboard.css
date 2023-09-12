@@ -1,0 +1,27 @@
+/*Estilos de la tabla dashboard*/
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.styled-table th,
+.styled-table td {
+    border: none;
+    padding: 8px;
+    text-align: center;
+}
+
+  /* Estilo para los botones dentro de la tabla */
+.styled-table a.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    transition: transform 0.2s ease-in-out;
+}
+
+.styled-table a.btn:hover {
+    transform: scale(1.05);
+}
