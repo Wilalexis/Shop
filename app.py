@@ -227,7 +227,7 @@ def editUsers(ID_USUARIO):
 @app.route('/admin/products')  # Ruta para la página de productos
 def products():
     cursor = connection.cursor()
-    cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA")
+    cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA ORDER BY P.ID_PRODUCTO DESC")
     productos = cursor.fetchall()
     cursor.close()
 
@@ -306,6 +306,21 @@ def editProducts(ID_PRODUCTO):
 
             # Cierra el cursor y la conexión
             cursor.close()
+
+            cursor1 = connection.cursor()
+            cursor1.execute("SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
+            tallasproductos = cursor1.fetchall()
+            cursor1.close()
+
+            cursor2 = connection.cursor()
+            cursor2.execute("SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
+            categoriasproductos = cursor2.fetchall()
+            cursor2.close()
+
+            cursor3 = connection.cursor()
+            cursor3.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
+            marcasproductos = cursor3.fetchall()
+            cursor3.close()
             connection.close()
 
             if producto is None:
@@ -314,7 +329,11 @@ def editProducts(ID_PRODUCTO):
                 # Redirige a la página de usuarios
                 return redirect(url_for('products'))
 
-            return render_template('editProducts.html', producto=producto)
+
+            return render_template('editProducts.html', producto=producto, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos)
+
+
+            #return render_template('editProducts.html', producto=producto)
 
         except Exception as e:
             print("Error al obtener el producto:", str(e))

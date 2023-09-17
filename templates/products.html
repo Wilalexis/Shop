@@ -85,7 +85,7 @@
                         <label for="talla"><i class="fas fa-tshirt"></i> Talla:</label>
                         <select class="form-control" id="id_talla" name="id_talla" required>
                             {% for tallasproducto in tallasproductos %}
-                            <option value="1">{{ tallasproducto[1] }}</option>
+                            <option value="{{ tallasproducto[0] }}">{{ tallasproducto[1] }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -94,7 +94,7 @@
                         <label for="categoria"><i class="fas fa-folder"></i> Categoria:</label>
                         <select class="form-control" id="id_categoria" name="id_categoria" required>
                             {% for categoriasproducto in categoriasproductos %}
-                            <option value="1">{{ categoriasproducto[1] }}</option>
+                            <option value="{{ categoriasproducto[0] }}">{{ categoriasproducto[1] }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -103,7 +103,7 @@
                         <label for="marca"><i class="fas fa-tags"></i> Marca:</label>
                         <select class="form-control" id="id_marca" name="id_marca" required>
                             {% for marcasproducto in marcasproductos %}
-                            <option value="1">{{ marcasproducto[1] }}</option>
+                            <option value="{{ marcasproducto[0] }}">{{ marcasproducto[1] }}</option>
                             {% endfor %}
                         </select>
                     </div>
