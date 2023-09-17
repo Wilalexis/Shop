@@ -74,8 +74,7 @@ def users():
     users_to_display = usuarios[start:end]
 
     # Crea un objeto de paginación
-    pagination = Pagination(page=page, per_page=per_page, total=total_users,
-                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
+    pagination = Pagination(page=page, per_page=per_page, total=total_users, css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
 
     return render_template('users.html', usuarios=users_to_display, pagination=pagination, roles=roles)
 
@@ -251,7 +250,24 @@ def products():
     marcasproductos = cursor3.fetchall()
     cursor3.close()
 
-    return render_template('products.html', productos=productos, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos)
+    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+    page = request.args.get('page', type=int, default=1)
+    per_page = request.args.get('per_page', type=int, default=5)
+
+    # Supongamos que tienes una lista de productos llamada 'productos'
+    total_products = len(productos)
+
+    # Calcula el índice de inicio y final para la página actual
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    # Obtiene los productos para la página actual
+    products_to_display = productos[start:end]
+
+    # Crea un objeto de paginación
+    pagination = Pagination(page=page, per_page=per_page, total=total_products, css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
+
+    return render_template('products.html', productos=products_to_display, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, pagination=pagination)
 
 # Ruta para insertar a Oracle los datos del producto
 @app.route('/crear_producto', methods=['POST'])
@@ -461,6 +477,39 @@ def registerUser():
 
     # Devuelve la plantilla de registro con los valores de los campos y el mensaje
     return render_template('register.html', nombre=nombre, correo=correo, message=message, message_type=message_type)
+
+@app.route('/buscar_productos', methods=['POST'])
+def buscar_productos():
+    campo_busqueda = request.form.get('campo_busqueda')
+    valor_busqueda = request.form.get('valor_busqueda')
+
+    # Consulta SQL parametrizada
+    query = "SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA WHERE 1=1"
+
+    # Crear un diccionario de parámetros vacío
+    params = {}
+
+    if campo_busqueda == "nombre_producto" and valor_busqueda:
+        query += " AND nombre_producto LIKE :nombre_producto"
+        params['nombre_producto'] = f'%{valor_busqueda}%'
+    elif campo_busqueda == "nombre_talla" and valor_busqueda:
+        query += " AND nombre_talla LIKE :nombre_talla"
+        params['nombre_talla'] = f'%{valor_busqueda}%'
+    elif campo_busqueda == "nombre_categoria" and valor_busqueda:
+        query += " AND nombre_categoria LIKE :nombre_categoria"
+        params['nombre_categoria'] = f'%{valor_busqueda}%'
+    elif campo_busqueda == "nombre_marca" and valor_busqueda:
+        query += " AND nombre_marca LIKE :nombre_marca"
+        params['nombre_marca'] = f'%{valor_busqueda}%'
+
+    # Ejecutar la consulta y obtener los resultados
+    cursor = connection.cursor()
+    cursor.execute(query, params)
+    productos_encontrados = cursor.fetchall()
+    cursor.close()
+
+    # Renderizar la página de resultados de búsqueda con los productos encontrados
+    return render_template('resultadosBusquedaProducto.html', productos=productos_encontrados)
 
 if __name__ == '__main__':
     app.run(debug=True)
