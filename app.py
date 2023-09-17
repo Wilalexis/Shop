@@ -50,10 +50,14 @@ def shoppingcart():
 @app.route('/admin/users')  # Ruta para la página de usuarios
 def users():
     cursor = connection.cursor()
-    cursor.execute(
-        "SELECT U.ID_USUARIO, U.NOMBRE, U.CORREO, U.CONTRASENA, R.NOMBRE_ROL FROM USUARIOS U JOIN ROLES R ON U.ID_ROL = R.ID_ROL")
+    cursor.execute("SELECT U.ID_USUARIO, U.NOMBRE, U.CORREO, U.CONTRASENA, R.NOMBRE_ROL FROM USUARIOS U JOIN ROLES R ON U.ID_ROL = R.ID_ROL")
     usuarios = cursor.fetchall()
     cursor.close()
+
+    cursor1 = connection.cursor()
+    cursor1.execute("SELECT ID_ROL, NOMBRE_ROL FROM ROLES")
+    roles = cursor1.fetchall()
+    cursor1.close()
 
     # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
     page = request.args.get('page', type=int, default=1)
@@ -73,8 +77,7 @@ def users():
     pagination = Pagination(page=page, per_page=per_page, total=total_users,
                             css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
 
-    return render_template('users.html', usuarios=users_to_display, pagination=pagination)
-
+    return render_template('users.html', usuarios=users_to_display, pagination=pagination, roles=roles)
 
 # Ruta para insertar a Oracle los datos de usuario
 @app.route('/crear_usuario', methods=['POST'])
@@ -98,7 +101,6 @@ def crear_usuario():
 
     return redirect(url_for('users'))
 
-
 @app.route('/eliminar_usuario/<int:ID_USUARIO>', methods=['POST', 'DELETE'])
 def eliminar_usuario(ID_USUARIO):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
@@ -115,7 +117,6 @@ def eliminar_usuario(ID_USUARIO):
             cursor.close()
 
     return redirect(url_for('users'))
-
 
 @app.route('/buscar_usuarios', methods=['POST'])
 def buscar_usuarios():
@@ -144,7 +145,6 @@ def buscar_usuarios():
     # Renderizar la página de resultados de búsqueda con los usuarios encontrados
     return render_template('resultadosBusquedaUsuario.html', usuarios=usuarios_encontrados)
 
-
 @app.route('/editUsers/<int:ID_USUARIO>', methods=['GET', 'POST'])
 def editUsers(ID_USUARIO):
     if request.method == 'GET':
@@ -168,6 +168,11 @@ def editUsers(ID_USUARIO):
 
             # Cierra el cursor y la conexión
             cursor.close()
+
+            cursor1 = connection.cursor()
+            cursor1.execute("SELECT ID_ROL, NOMBRE_ROL FROM ROLES")
+            roles = cursor1.fetchall()
+            cursor1.close()
             connection.close()
 
             if usuario is None:
@@ -176,7 +181,7 @@ def editUsers(ID_USUARIO):
                 # Redirige a la página de usuarios
                 return redirect(url_for('users'))
 
-            return render_template('editUsers.html', usuario=usuario)
+            return render_template('editUsers.html', usuario=usuario, roles=roles)
 
         except Exception as e:
             print("Error al obtener el usuario:", str(e))

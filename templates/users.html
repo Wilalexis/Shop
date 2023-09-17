@@ -130,8 +130,9 @@
                     <div class="form-group">
                         <label for="rol"><i class="fas fa-user-tag"></i> Rol:</label>
                         <select class="form-control" id="id_rol" name="id_rol" required>
-                            <option value="1">Administrador</option>
-                            <option value="2">Usuario</option>
+                            {% for rol in roles %}
+                            <option value="{{ rol[0] }}">{{ rol[1] }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="modal-footer">
