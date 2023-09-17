@@ -13,13 +13,10 @@ app.secret_key = 'admin'  # clave secreta
 dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
 connection = cx_Oracle.connect(user='USR_DLSOCKS', password='admin', dsn=dsn)
 
-
 class DeleteForm(FlaskForm):
     _method = HiddenField()
 
 # Rutas
-
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -387,6 +384,48 @@ def eliminar_producto(ID_PRODUCTO):
             cursor.close()
 
     return redirect(url_for('products'))
+
+@app.route('/registerUser', methods=['POST'])
+def registerUser():
+    # Obtén los valores de los campos del formulario
+    nombre = request.form.get('nombre')
+    correo = request.form.get('correo')
+    contrasena = request.form.get('contrasena')
+    confirmarContrasena = request.form.get('confirmarContrasena')
+    id_rol = 2
+
+    # Inicializa un mensaje y un tipo de mensaje predeterminado
+    message = None
+    message_type = 'success'
+
+    # Verifica si las contraseñas coinciden
+    if contrasena == confirmarContrasena:
+        # Las contraseñas coinciden, puedes proceder a almacenarla en la base de datos
+        # Aquí deberías insertar el código para almacenar el usuario en la base de datos
+        sql = "INSERT INTO usuarios (nombre, correo, contrasena, id_rol) VALUES (:nombre, :correo, :contrasena, :id_rol)"
+
+        # Ejecutar la consulta
+        cursor = connection.cursor()
+        cursor.execute(sql, {'nombre': nombre, 'correo': correo,
+                             'contrasena': contrasena, 'id_rol': id_rol})
+        connection.commit()
+
+        message = 'Usuario registrado con éxito'
+
+        # Establece los valores de los campos en blanco
+        nombre = ''
+        correo = ''
+        contrasena = ''
+        confirmarContrasena = ''
+    else:
+        # Las contraseñas no coinciden, muestra un mensaje de error al usuario
+        message = 'Las contraseñas no coinciden, por favor inténtalo de nuevo'
+        message_type = 'error'
+
+    # Devuelve la plantilla de registro con los valores de los campos y el mensaje
+    return render_template('register.html', nombre=nombre, correo=correo, message=message, message_type=message_type)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

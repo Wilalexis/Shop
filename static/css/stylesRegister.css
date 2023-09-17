@@ -29,6 +29,16 @@
 
 .form-group {
     margin-bottom: 20px;
+    display: flex;
+    align-items: center; /* Centra verticalmente los elementos en el formulario */
+    margin-bottom: 20px;
+}
+
+/* Estilo para la clase "align-left" para que los cuadros de mostrar contraseña esten del lado izquierdo*/
+.align-left {
+    justify-content: flex-start; /* Alinea horizontalmente los elementos a la izquierda */
+    text-align: left; /* Alinea el texto a la izquierda */
+    margin-bottom: 10px; /* Añade un margen inferior para separar del contenido superior */
 }
 
 .form-control {
@@ -37,6 +47,11 @@
     border-radius: 5px;
     width: 100%;
     font-size: 16px;
+    flex: 1; /* El campo de contraseña ocupará todo el espacio disponible */
+}
+
+.mostrar-contrasena {
+    margin-left: 10px;
 }
 
 .btn-primary {
@@ -67,4 +82,13 @@
 
 .login-link a:hover {
     text-decoration: underline;
+}
+/* Estilo para mensajes de éxito */
+.success {
+    color: green; /* Texto verde */
+}
+
+/* Estilo para mensajes de error */
+.error {
+    color: red; /* Texto rojo */
 }

@@ -6,13 +6,19 @@
 .btn {
     margin-right: 10 px;
 }
- .usuarios-table{
-    background-color: none;
- }
 
 .usuarios-table th,
 .usuarios-table td {
     text-align: center; /* Centrar el texto en celdas */
+}
+
+.usuarios-table{
+    background-color: white;
+}
+
+.usuarios-table tbody tr:hover {
+    background-color: #F5FEFE; /* Cambia el color de fondo al pasar el mouse sobre las filas */
+    cursor: pointer; /* Cambia el cursor a una mano para indicar que es interactivo */
 }
 
 .usuarios-table td {

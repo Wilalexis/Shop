@@ -20,8 +20,17 @@
     color: #fff;
     text-decoration: none;
     transition: transform 0.2s ease-in-out;
+    width: 350px; /* Establece el ancho deseado */
+    height: 100px; /* Establece la altura deseada */
+    font-size: 20px; /* Ajusta el tamaño de fuente si es necesario */
 }
 
 .styled-table a.btn:hover {
     transform: scale(1.05);
+}
+
+/* Estilo para las imágenes dentro de los botones en el dashboard */
+.btn-dashboard img {
+    width: 80px; /* Establece el ancho deseado para las imágenes */
+    height: 80px; /* Establece la altura deseada para las imágenes */
 }

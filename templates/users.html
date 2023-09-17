@@ -42,7 +42,7 @@
             </div>
         </form><br>
         
-        <table class="table table-bordered table-striped table-hover usuarios-table">
+        <table class="table table-bordered usuarios-table">
             <thead class="thead-dark">
                 <tr>
                     <th>Nombre</th>
@@ -91,39 +91,6 @@
 <div class="pagination">
     {{ pagination.info }}
     {{ pagination.links }}
-</div>
-
-<!-- Aquí empieza la ventana modal-->
-
-<!-- Aquí empieza Modal para editar usuario -->
-{% for usuario in usuarios %}
-<div class="modal fade" id="editarUsuarioModal{{ usuario[0] }}" tabindex="-1" aria-labelledby="editarUsuarioModalLabel" aria-hidden="true">
-    
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editarUsuarioModalLabel">Editar Usuario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Aquí puedes agregar un formulario para editar los datos del usuario -->
-                <form action="{{ url_for('editUsers', ID_USUARIO=usuario[0]) }}" method="POST">
-                    <!-- Campos de entrada para los datos del usuario -->
-                    <div class="form-group">
-                        <label for="nombre">Nombre</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" value="{{ usuario[1] }}">
-                    </div>
-                    <div class="form-group">
-                        <label for="correo">Correo Electrónico</label>
-                        <input type="email" class="form-control" id="correo" name="correo" value="{{ usuario[2] }}">
-                    </div>
-                    <!-- Agrega más campos según tus necesidades -->
-
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Aquí empieza Modal para crear usuario -->
@@ -183,5 +150,4 @@
 </div>
 <!-- Aquí termina la ventana modal-->
 
-{% endfor %}
 {% endblock %}

@@ -6,30 +6,46 @@
         <div class="registration-logo">
             <img src="{{ url_for('static', filename='img/register.png') }}" alt="Logo de la Tienda">
         </div>
+        <!-- Aquí muestra mensajes de éxito o error -->
+        {% if message %}
+            <div class="message {% if message_type == 'success' %}success{% elif message_type == 'error' %}error{% endif %}">
+                {{ message }}
+            </div>        
+        {% endif %}
         <h2 class="registration-title">Regístrate</h2>
-        <form>
+        <form action="{{ url_for('registerUser') }}" method="POST">
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="Nombre" required>
+                <input type="text" class="form-control" placeholder="Nombre" id="nombre" name="nombre" value="{{ nombre }}" required>
             </div>
             <div class="form-group">
-                <input type="email" class="form-control" placeholder="Correo electrónico" required>
+                <input type="email" class="form-control" placeholder="Correo electrónico" id="correo" name="correo" value="{{ correo }}" required>
             </div>
             <div class="form-group">
-                <input type="password" class="form-control" placeholder="Contraseña" required>
+                <input type="password" class="form-control" placeholder="Contraseña" id="contrasena" name="contrasena"  required oninput="validarContrasena()">                               
             </div>
+            <div class="form-check align-left">
+                <input type="checkbox" class="form-check-input" id="ver_contrasena">
+                <label class="form-check-label" for="ver_contrasena">Ver contraseña</label>                
+            </div> 
             <div class="form-group">
-                <input type="password" class="form-control" placeholder="Confirmar contraseña" required>
+                <input type="password" class="form-control" placeholder="Confirmar contraseña" id="confirmarContrasena" name="confirmarContrasena" required oninput="validarContrasena()">                
             </div>
+            <div class="form-check align-left">
+                <input type="checkbox" class="form-check-input" id="verConfirmarContrasena">
+                <label class="form-check-label" for="verConfirmarContrasena">Ver contraseña</label>
+            </div>
+            <p id="mensajeError" style="color: red;"></p> <!-- Elemento para mostrar el mensaje de error -->
             <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
         </form>
         <div class="login-link">
             ¿Ya tienes una cuenta? <a href="{{ url_for('login') }}">Iniciar sesión</a>
         </div>
+        
     </div>
 </div>
 <br>
 {% endblock %}
 <br>
 {% block footer %}
-    <p>&copy; 2023 Rodas Shop. Todos los derechos reservados.</p>
+    <p>&copy; 2023 Di Socks GT. Todos los derechos reservados.</p>
 {% endblock %}
