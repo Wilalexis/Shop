@@ -6,3 +6,25 @@
 .btn {
     margin-right: 10px;
 }
+
+.productos-table th,
+.productos-table td {
+    text-align: center; /* Centrar el texto en celdas */
+}
+
+.productos-table{
+    background-color: white;
+}
+
+.productos-table tbody tr:hover {
+    background-color: #F5FEFE; /* Cambia el color de fondo al pasar el mouse sobre las filas */
+    cursor: pointer; /* Cambia el cursor a una mano para indicar que es interactivo */
+}
+
+.productos-table td {
+    word-break: break-word;
+    max-width: 100px; /* Ajusta según tus necesidades */
+    white-space: nowrap; /* Evita el salto de línea en las celdas */
+    overflow: hidden; /* Evita que el contenido sobresalga */
+    text-overflow: ellipsis; /* Agrega puntos suspensivos si el contenido es muy largo */
+}
