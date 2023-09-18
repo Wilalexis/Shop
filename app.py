@@ -46,6 +46,81 @@ def dashboard():
 def shoppingcart():
     return render_template('shoppingcart.html')
 
+@app.route('/category') # ruta para la pagina categorias
+def category():
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT ID_CATEGORIA, NOMBRE_categoria FROM CATEGORIAS")
+    categorias = cursor.fetchall()
+    cursor.close()
+
+    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+    page = request.args.get('page', type=int, default=1)
+    per_page = request.args.get('per_page', type=int, default=5)
+
+    # Supongamos que tienes una lista de usuarios llamada 'categorias'
+    total_category = len(categorias)
+
+    # Calcula el índice de inicio y final para la página actual
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    #obtiene las categorias actuales
+    category_to_display = categorias[start:end]
+
+    # Crea un objeto de paginación
+    pagination = Pagination(page=page, per_page=per_page, total=total_category,
+                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
+
+
+    return render_template('category.html', categorias=category_to_display, pagination=pagination)
+
+@app.route('/editCategory') #ruta para editar categoria
+def editCategory():
+    return render_template('category.html')
+
+@app.route('/eliminar_categoria') #ruta para eliminar categoria
+def eliminar_categoria():
+    return render_template('category.html')
+
+@app.route('/marcs')
+def marcs():
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
+    marcas = cursor.fetchall()
+    cursor.close()
+
+    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+    page = request.args.get('page', type=int, default=1)
+    per_page = request.args.get('per_page', type=int, default=5)
+
+    # Supongamos que tienes una lista de usuarios llamada 'marcas'
+    total_marcs = len(marcas)
+
+    # Calcula el índice de inicio y final para la página actual
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    #obtiene las marcas actuales
+    marcs_to_display = marcas[start:end]
+
+    # Crea un objeto de paginación
+    pagination = Pagination(page=page, per_page=per_page, total=total_marcs,
+                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} marcas')
+    
+    
+    return render_template('marc.html', marcas=marcs_to_display, pagination=pagination)
+
+@app.route('/editMarc') #ruta para editar marcas
+def editMarc():
+    return render_template('marcs.html')
+
+
+
+@app.route('/eliminar_marca') #ruta para eliminar marcas
+def eliminar_marca():
+    return render_template('marc.html')
 
 @app.route('/admin/users')  # Ruta para la página de usuarios
 def users():
@@ -71,7 +146,7 @@ def users():
 
     # Crea un objeto de paginación
     pagination = Pagination(page=page, per_page=per_page, total=total_users,
-                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
+                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} categoria')
 
     return render_template('users.html', usuarios=users_to_display, pagination=pagination)
 

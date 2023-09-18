@@ -1,0 +1,70 @@
+{% extends 'baseDashboard.html' %}
+
+{% block content %}
+
+<div class="container">
+    <h2> <br> Gestion de categorias </h2>
+    <a href="#" class="btm btn-success" data-toggle="modal" data-target="#nuevaCategoriaModal">Nueva Categoria</a>
+    <br><br>
+    <div class="table-responsive">
+
+        {% if 'mensaje' in session %}
+        <div id="mensaje-exito" class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session.pop('mensaje') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endif %}
+        
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-{{ messages[0] }}" role="alert">
+            {{ messages[1] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+         <!-- Tabla -->
+         <table class="table table-bordered categoria-table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Categoria</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead> 
+            <tbody class="">
+                {% for categoria in categorias %} <!-- minusculas xd :0 --> 
+                <tr>
+                    
+                    <td>{{ categoria[1] }}</td>           
+                    <td >
+                            
+                        <div  class="button-container text-center" >                                                                                                      
+                            <form action="{{ url_for('eliminar_categoria', ID_CATEGORIA=categoria[0]) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta Categoria?');">                                                                                    
+                                <!-- Botón Modificar -->
+                                <a href="{{ url_for('editCategory', ID_CATEGORIA=categoria[0]) }}" class="btn btn-info btn-sm">
+                                    <img src="{{ url_for('static', filename='img/edit.png') }}" alt="Editar" width="25" height="25">
+                                </a>                                                                                    
+                                <!-- Botón Eliminar -->                            
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger btn-sm" >
+                                    <img src="{{ url_for('static', filename='img/remove-user.png') }}" alt="Eliminar" width="25" height="25">
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>      
+         </table>    
+    </div>
+</div>
+
+<!-- Mostrar los botones de paginación -->
+<div class="pagination">
+    {{ pagination.info }}
+    {{ pagination.links }}
+</div>
+
+{% endblock %}
