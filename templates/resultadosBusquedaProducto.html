@@ -1,0 +1,59 @@
+{% extends 'baseDashboard.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Resultados de la Búsqueda</h2>
+
+    <!-- Agregar un enlace para volver a la página de usuarios si es necesario -->
+    <a href="{{ url_for('products') }}" class="btn btn-success">Volver a Productos</a><br><br>
+
+    <table class="table table-bordered productos-table">
+        <thead class="thead-dark">
+            <tr>
+                <th>Imagen</th>
+                <th>Producto</th>
+                <th>Descripción</th>
+                <th>Talla</th>
+                <th>Categoria</th>
+                <th>Marca</th>
+                <th>Precio</th>
+                <th>Existencia</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos %}
+            <tr>
+                <td><img src="{{ url_for('static', filename=producto[8]) }}" alt="Imagen" width="100" height="100">
+                </td>
+                <td>{{ producto[1] }}</td>
+                <td>{{ producto[2] }}</td>
+                <td>{{ producto[3] }}</td>
+                <td>{{ producto[4] }}</td>
+                <td>{{ producto[5] }}</td>
+                <td>Q. {{ producto[6] }}</td>
+                <td>{{ producto[7] }}</td>
+                <td>
+                    <div class="button-container text-center">
+                        <form action="{{ url_for('eliminar_producto', ID_PRODUCTO=producto[0]) }}" method="POST"
+                            onsubmit="return confirm('¿Estás seguro de que deseas eliminar este producto?');">
+                            <!-- Botón Modificar -->
+                            <a href="{{ url_for('editProducts', ID_PRODUCTO=producto[0]) }}"
+                                class="btn btn-info btn-sm"><img
+                                    src="{{ url_for('static', filename='img/edit.png') }}" alt="Editar" width="25"
+                                    height="25"></a>
+                            <!-- Botón Eliminar -->
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <img src="{{ url_for('static', filename='img/remove-user.png') }}" alt="Eliminar"
+                                    width="25" height="25">
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
