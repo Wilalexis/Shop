@@ -7,21 +7,21 @@
     margin-right: 10 px;
 }
 
-.usuarios-table th,
-.usuarios-table td {
+.categoria-table th,
+.categoria-table td {
     text-align: center; /* Centrar el texto en celdas */
 }
 
-.usuarios-table{
+.categoria-table{
     background-color: white;
 }
 
-.usuarios-table tbody tr:hover {
+.categoria-table tbody tr:hover {
     background-color: #F5FEFE; /* Cambia el color de fondo al pasar el mouse sobre las filas */
     cursor: pointer; /* Cambia el cursor a una mano para indicar que es interactivo */
 }
 
-.usuarios-table td {
+.categoria-table td {
     word-break: break-word;
     max-width: 100px; /* Ajusta según tus necesidades */
     white-space: nowrap; /* Evita el salto de línea en las celdas */
