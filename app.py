@@ -5,6 +5,7 @@ from flask_paginate import Pagination, get_page_args
 from flask_bootstrap import Bootstrap
 import cx_Oracle
 import os
+import time
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = 'admin'  # clave secreta
@@ -45,6 +46,32 @@ def dashboard():
 @app.route('/shoppingcart')  # Ruta para la página de carrito de compras
 def shoppingcart():
     return render_template('shoppingcart.html')
+
+@app.route('/buy') # Ruta para la página de compras
+def buy():
+    cursor = connection.cursor()
+    cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA ORDER BY P.ID_PRODUCTO DESC")
+    productos = cursor.fetchall()
+    cursor.close()
+
+    cursor1 = connection.cursor()
+    cursor1.execute("SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
+    tallasproductos = cursor1.fetchall()
+    cursor1.close()
+
+    cursor2 = connection.cursor()
+    cursor2.execute("SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
+    categoriasproductos = cursor2.fetchall()
+    cursor2.close()
+
+    cursor3 = connection.cursor()
+    cursor3.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
+    marcasproductos = cursor3.fetchall()
+    cursor3.close()
+
+    timestamp = int(time.time())
+
+    return render_template('buy.html', productos=productos, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, timestamp=timestamp)
 
 
 @app.route('/admin/users')  # Ruta para la página de usuarios
@@ -510,6 +537,29 @@ def buscar_productos():
 
     # Renderizar la página de resultados de búsqueda con los productos encontrados
     return render_template('resultadosBusquedaProducto.html', productos=productos_encontrados)
+
+@app.route('/agregar/<int:producto_id>')
+def agregar_producto(producto_id):
+    if 'carrito' not in session:
+        session['carrito'] = []
+    session['carrito'].append(producto_id)
+    return redirect(url_for('index'))
+
+@app.route('/carrito')
+def ver_carrito():
+    carrito = []
+    if 'carrito' in session:
+        for producto_id in session['carrito']:
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM productos WHERE id = :id", {'id': producto_id})
+            producto = cursor.fetchone()
+            carrito.append(producto)
+    return render_template('carrito.html', carrito=carrito)
+
+@app.route('/limpiar_carrito')
+def limpiar_carrito():
+    session.pop('carrito', None)
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)

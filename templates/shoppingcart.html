@@ -1,23 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Carrito de Compras</title>
-</head>
-<body>
-    <h1>Productos</h1>
-    <ul>
-        <li><a href="#">Producto 1</a></li>
-        <li><a href="#">Producto 2</a></li>
-        <li><a href="#">Producto 3</a></li>
-    </ul>
+{% extends 'base.html' %}
 
-    <h2>Carrito de Compras</h2>
-    <ul>
-        {% for producto_id in carrito %}
-            <li>Producto {{ producto_id }}</li>
+{% block content %}
+
+<h1>Carrito de Compras</h1>
+
+{% if carrito %}
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for producto in carrito %}
+        <tr>
+            <td>{{ producto[1] }}</td>
+            <!-- Supongo que el nombre del producto está en la segunda columna de tu tabla Oracle -->
+            <td>${{ producto[2] }}</td> <!-- Supongo que el precio del producto está en la tercera columna -->
+            <td><a href="/quitar/{{ producto[0] }}">Quitar</a></td>
+            <!-- Supongo que el ID del producto está en la primera columna -->
+        </tr>
         {% endfor %}
-    </ul>
+    </tbody>
+</table>
+<p>Total: ${{ total_carrito }}</p>
 
-    <a href="#">Vaciar Carrito</a>
-</body>
-</html>
+<a href="/limpiar_carrito">Vaciar carrito</a>
+<a href="/">Seguir comprando</a>
+<a href="/realizar_pedido">Realizar pedido</a>
+{% else %}
+<p>El carrito de compras está vacío.</p>
+<a href="/">Ir a la tienda</a>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,93 @@
+* {
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+.card-container {
+    width: 100%;
+    height: 82vh;
+    padding: 5px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.card {
+    height: 350px;
+    margin: 10px;
+    background-color: white;
+    border: 0.5px solid rgba(110, 110, 110, 0.397);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    text-align: center;
+    font-family: Arial;
+}
+
+.card .card-img img {
+    width: 175px ;
+    height: 175px;
+    margin: 5px;
+    user-select: none;
+}
+
+.card .card-text {
+    width: 99%;
+    height: 50px;
+    margin: 1px;
+    font-size: 100%;
+    user-select: none;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+}
+
+.card .card-brand {
+    text-align: left;
+    font-weight: bold;
+    color: gray;
+}
+
+.card .card-description {
+    text-align: justify;
+    font-size: 16px;
+}
+
+.card .card-price {
+    text-align: left;
+    font-weight: bold;
+    color: crimson;
+}
+
+.card-container :hover {
+    background-color: whitesmoke;
+    cursor: pointer;
+}
+
+.card form {
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card input {
+    width: 50%;
+    height: 25px;
+    margin: 4px;
+    border-radius: 4px;
+    border: 0.5px solid rgba(110, 110, 110, 0.397);
+}
+
+.card .btn-agregar {
+    width: 100%;
+    height: 25px;
+    color: white;
+    background-color: rgb(18, 214, 18);
+    border: 1px solid rgb(18, 214, 18);
+    border-radius: 4px;
+    cursor: pointer;
+}
