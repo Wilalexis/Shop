@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesUsers.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesProducts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesDashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesUsers.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesCategory.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesMarcs.css') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
 <!-- Archivos de Bootstrap CSS y JavaScript -->
@@ -27,9 +30,9 @@
         <a href="{{ url_for('dashboard') }}"><i class="fas fa-home"></i> Inicio</a>
         <a href="{{ url_for('users') }}"><i class="fas fa-users"></i> Usuarios</a>
         <a href="{{ url_for('products') }}"><i class="fas fa-shopping-cart"></i> Productos</a>
-        <a href="#"><i class="fas fa-folder"></i> Categorías</a>
+        <a href="{{ url_for('category') }}"><i class="fas fa-folder"></i> Categorías</a>
         <a href="#"><i class="fas fa-users"></i> Clientes</a>
-        <a href="#"><i class="fas fa-tags"></i> Marcas</a>
+        <a href="{{ url_for('marcs') }}"><i class="fas fa-tags"></i> Marcas</a>
         <a href="#"><i class="fas fa-receipt"></i> Recibos</a>
         <a href="#"><i class="fas fa-tshirt"></i> Tallas</a>
         <a href="#"><i class="fas fa-file-alt"></i> Generar reporte</a>
@@ -45,6 +48,9 @@
     <script src="{{ url_for('static', filename='js/scriptUsers.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scriptEditarUsers.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scriptBaseDashboard.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='js/scriptCategory.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/scriptEditarCategory.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scriptMarc.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/scriptEditarMarc.js') }}"></script>
 </body>
 </html>
