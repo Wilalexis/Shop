@@ -89,11 +89,11 @@ def limpiar_carrito():
     session.pop('carrito', None)
     return redirect(url_for('index'))
 
-@app.route('/category') # ruta para la pagina categorias
+@app.route('/admin/category') # ruta para la pagina categorias
 def category():
     cursor = connection.cursor()
     cursor.execute(
-        "SELECT ID_CATEGORIA, NOMBRE_categoria FROM CATEGORIAS")
+        "SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
     categorias = cursor.fetchall()
     cursor.close()
 
@@ -126,7 +126,7 @@ def editCategory():
 def eliminar_categoria():
     return render_template('category.html')
 
-@app.route('/marcs')
+@app.route('/admin/marcs')
 def marcs():
     cursor = connection.cursor()
     cursor.execute(
@@ -158,8 +158,6 @@ def marcs():
 @app.route('/editMarc') #ruta para editar marcas
 def editMarc():
     return render_template('marcs.html')
-
-
 
 @app.route('/eliminar_marca') #ruta para eliminar marcas
 def eliminar_marca():
@@ -197,7 +195,6 @@ def users():
                             css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} categoria')
 
     return render_template('users.html', usuarios=users_to_display, pagination=pagination)
-
 
 # Ruta para insertar a Oracle los datos de usuario
 @app.route('/crear_usuario', methods=['POST'])
