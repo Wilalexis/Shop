@@ -366,6 +366,145 @@ def eliminar_marca(ID_MARCA):
 
     return render_template('marc.html')
 
+@app.route('/admin/sizes') # Ruta para la pagina de tallas
+def sizes():
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
+    tallas = cursor.fetchall()
+    cursor.close()
+
+    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+    page = request.args.get('page', type=int, default=1)
+    per_page = request.args.get('per_page', type=int, default=5)
+
+    # Supongamos que tienes una lista de usuarios llamada 'tallas'
+    total_sizes = len(tallas)
+
+    # Calcula el índice de inicio y final para la página actual
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    #obtiene las categorias actuales
+    sizes_to_display = tallas[start:end]
+
+    # Crea un objeto de paginación
+    pagination = Pagination(page=page, per_page=per_page, total=total_sizes,
+                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
+    
+    return render_template('sizes.html', tallas=sizes_to_display, pagination=pagination) 
+
+# Ruta para insertar a Oracle los datos de tallas
+@app.route('/crear_talla', methods=['POST'])
+def crear_talla():
+    nombre_talla = request.form.get('nombre_talla')
+
+    # Preparar la consulta SQL
+    sql = "INSERT INTO tallas (nombre_tallas) VALUES (:nombre_talla)"
+
+    # Ejecutar la consulta
+    cursor = connection.cursor()
+    cursor.execute(sql, {'nombre_talla': nombre_talla})
+    connection.commit()
+
+    # variable de sesion
+    session['mensaje'] = 'talla agregada correctamente'
+
+    return redirect(url_for('sizes'))
+
+@app.route('/editSizes/<int:ID_TALLA>', methods=['GET', 'POST']) #ruta para editar tallas
+def editSizes(ID_TALLA):
+    if request.method == 'GET':
+        try:
+            # Realiza la conexión a tu base de datos Oracle
+            dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
+            connection = cx_Oracle.connect(
+                user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+            # Crea un cursor
+            cursor = connection.cursor()
+
+            # Consulta SQL para obtener los datos por su ID
+            query = "SELECT ID_TALLA, nombre_talla FROM TALLAS WHERE ID_TALLA = :ID_TALLA"
+
+            # Ejecuta la consulta con el ID_TALLA como parámetro
+            cursor.execute(query, ID_TALLA=ID_TALLA)
+
+            # Obtiene los datos del marca
+            talla = cursor.fetchone()
+
+            # Cierra el cursor y la conexión
+            cursor.close()
+            connection.close()
+
+            if talla is None:
+                # Manejar el caso en el que no se encuentra la talla
+                flash('talla no encontrada', 'danger')
+                # Redirige a la página de talla
+                return redirect(url_for('sizes'))
+
+            return render_template('editSizes.html', talla=talla)
+
+        except Exception as e:
+            print("Error al obtener la talla:", str(e))
+            flash('Error al obtener la talla', 'danger')
+            # Redirige a la página de tallas
+            return redirect(url_for('sizes'))
+
+    elif request.method == 'POST':
+        try:
+            # Realiza la conexión a tu base de datos Oracle
+            dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
+            connection = cx_Oracle.connect(
+                user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+            # Crea un cursor
+            cursor = connection.cursor()
+
+            # Procesar el formulario de edición y actualizar los datos en la base de datos
+            nombre_talla = request.form.get('nombre_talla')
+
+            # Consulta SQL para actualizar los datos del usuario
+            query = "UPDATE tallas SET nombre_talla = :nombre_talla WHERE ID_talla = :id_tallas"
+
+            # Ejecuta la consulta con los nuevos valores y el ID_TALLAS como parámetro
+            cursor.execute(query, nombre_talla=nombre_talla, id_marca=ID_TALLA)
+
+            # Confirma la transacción
+            connection.commit()
+
+            # Cierra el cursor y la conexión
+            cursor.close()
+            connection.close()
+
+            flash('Tallas actualizada con éxito', 'success')
+            # Redirige de nuevo a la página de tallas
+            return redirect(url_for('sizes'))
+
+        except Exception as e:
+            print("Error al actualizar la talla:", str(e))
+            flash('Error al actualizar la talla', 'danger')
+            # Redirige a la página de tallas
+            return redirect(url_for('sizes'))
+
+@app.route('/eliminar_talla/<int:ID_TALLA>', methods=['POST', 'DELETE']) #ruta para eliminar Tallas
+def eliminar_talla(ID_TALLA):
+    if request.method == 'POST' or request.form.get('_method') == 'DELETE':
+        # Lógica para eliminar de la base de datos Oracle
+        try:
+            cursor = connection.cursor()
+            cursor.execute("DELETE FROM TALLAS WHERE ID_TALLA = :ID_TALLA", {
+                           'ID_TALLA': ID_TALLA})
+            connection.commit()
+            flash('Talla eliminada con éxito', 'success')
+        except Exception as e:
+            flash('Error al eliminar la talla', 'danger')
+        finally:
+            cursor.close()
+
+    return render_template('sizes.html')
+
+
 @app.route('/admin/users')  # Ruta para la página de usuarios
 def users():
     cursor = connection.cursor()
