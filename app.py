@@ -118,19 +118,120 @@ def category():
 
     return render_template('category.html', categorias=category_to_display, pagination=pagination)
 
-@app.route('/editCategory') #ruta para editar categoria
-def editCategory():
-    return render_template('category.html')
+# Ruta para insertar a Oracle los datos de categoría
+@app.route('/crear_categoria', methods=['POST'])
+def crear_categoria():
+    nombre_categoria = request.form.get('nombre_categoria')
 
-@app.route('/eliminar_categoria') #ruta para eliminar categoria
-def eliminar_categoria():
-    return render_template('category.html')
+    # Preparar la consulta SQL
+    sql = "INSERT INTO categorias (nombre_categoria) VALUES (:nombre_categoria)"
 
-@app.route('/admin/marcs')
-def marcs():
+    # Ejecutar la consulta
     cursor = connection.cursor()
-    cursor.execute(
-        "SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
+    cursor.execute(sql, {'nombre_categoria': nombre_categoria})
+    connection.commit()
+
+    # variable de sesion
+    session['mensaje'] = 'Categoría agregada correctamente'
+
+    return redirect(url_for('category'))
+
+@app.route('/editCategories/<int:ID_CATEGORIA>', methods=['GET', 'POST']) #ruta para editar categoria
+def editCategories(ID_CATEGORIA):
+    if request.method == 'GET':
+        try:
+            # Realiza la conexión a tu base de datos Oracle
+            dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
+            connection = cx_Oracle.connect(
+                user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+            # Crea un cursor
+            cursor = connection.cursor()
+
+            # Consulta SQL para obtener los datos por su ID
+            query = "SELECT ID_CATEGORIA, nombre_categoria FROM categorias WHERE ID_CATEGORIA = :id_categoria"
+
+            # Ejecuta la consulta con el ID_CATEGORIA como parámetro
+            cursor.execute(query, id_categoria=ID_CATEGORIA)
+
+            # Obtiene los datos del categoria
+            categoria = cursor.fetchone()
+
+            # Cierra el cursor y la conexión
+            cursor.close()
+            connection.close()
+
+            if categoria is None:
+                # Manejar el caso en el que no se encuentra el categoria
+                flash('Categoria no encontrada', 'danger')
+                # Redirige a la página de usuarios
+                return redirect(url_for('category'))
+
+            return render_template('editCategories.html', categoria=categoria)
+
+        except Exception as e:
+            print("Error al obtener la categoria:", str(e))
+            flash('Error al obtener la categoria', 'danger')
+            # Redirige a la página de usuarios
+            return redirect(url_for('category'))
+
+    elif request.method == 'POST':
+        try:
+            # Realiza la conexión a tu base de datos Oracle
+            dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
+            connection = cx_Oracle.connect(
+                user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+            # Crea un cursor
+            cursor = connection.cursor()
+
+            # Procesar el formulario de edición y actualizar los datos en la base de datos
+            nombre_categoria = request.form.get('nombre_categoria')
+
+            # Consulta SQL para actualizar los datos del usuario
+            query = "UPDATE categorias SET nombre_categoria = :nombre_categoria WHERE ID_CATEGORIA = :id_categoria"
+
+            # Ejecuta la consulta con los nuevos valores y el ID_CATEGORIA como parámetro
+            cursor.execute(query, nombre_categoria=nombre_categoria, id_categoria=ID_CATEGORIA)
+
+            # Confirma la transacción
+            connection.commit()
+
+            # Cierra el cursor y la conexión
+            cursor.close()
+            connection.close()
+
+            flash('Categoria actualizada con éxito', 'success')
+            # Redirige de nuevo a la página de usuarios
+            return redirect(url_for('category'))
+
+        except Exception as e:
+            print("Error al actualizar la categoria:", str(e))
+            flash('Error al actualizar la categoria', 'danger')
+            # Redirige a la página de usuarios
+            return redirect(url_for('category'))
+
+@app.route('/eliminar_categoria/<int:ID_CATEGORIA>', methods=['POST', 'DELETE']) #ruta para eliminar categoria
+def eliminar_categoria(ID_CATEGORIA):
+    if request.method == 'POST' or request.form.get('_method') == 'DELETE':
+        # Lógica para eliminar de la base de datos Oracle
+        try:
+            cursor = connection.cursor()
+            cursor.execute("DELETE FROM CATEGORIAS WHERE ID_CATEGORIA = :ID_CATEGORIA", {
+                           'ID_CATEGORIA': ID_CATEGORIA})
+            connection.commit()
+            flash('Categoria eliminada con éxito', 'success')
+        except Exception as e:
+            flash('Error al eliminar la categoria', 'danger')
+        finally:
+            cursor.close()
+
+    return render_template('category.html')
+
+@app.route('/admin/marc')
+def marc():
+    cursor = connection.cursor()
+    cursor.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
     marcas = cursor.fetchall()
     cursor.close()
 
@@ -139,28 +240,130 @@ def marcs():
     per_page = request.args.get('per_page', type=int, default=5)
 
     # Supongamos que tienes una lista de usuarios llamada 'marcas'
-    total_marcs = len(marcas)
+    total_brands = len(marcas)
 
     # Calcula el índice de inicio y final para la página actual
     start = (page - 1) * per_page
     end = start + per_page
 
     #obtiene las marcas actuales
-    marcs_to_display = marcas[start:end]
+    brandas_to_display = marcas[start:end]
 
     # Crea un objeto de paginación
-    pagination = Pagination(page=page, per_page=per_page, total=total_marcs,
+    pagination = Pagination(page=page, per_page=per_page, total=total_brands,
                             css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} marcas')
     
     
-    return render_template('marc.html', marcas=marcs_to_display, pagination=pagination)
+    return render_template('marc.html', marcas=brandas_to_display, pagination=pagination)
 
-@app.route('/editMarc') #ruta para editar marcas
-def editMarc():
-    return render_template('marcs.html')
+# Ruta para insertar a Oracle los datos de marcas
+@app.route('/crear_marca', methods=['POST'])
+def crear_marca():
+    nombre_marca = request.form.get('nombre_marca')
 
-@app.route('/eliminar_marca') #ruta para eliminar marcas
-def eliminar_marca():
+    # Preparar la consulta SQL
+    sql = "INSERT INTO marcas (nombre_marca) VALUES (:nombre_marca)"
+
+    # Ejecutar la consulta
+    cursor = connection.cursor()
+    cursor.execute(sql, {'nombre_marca': nombre_marca})
+    connection.commit()
+
+    # variable de sesion
+    session['mensaje'] = 'Marca agregada correctamente'
+
+    return redirect(url_for('marc'))
+
+@app.route('/editBrands/<int:ID_MARCA>', methods=['GET', 'POST']) #ruta para editar marcas
+def editBrands(ID_MARCA):
+    if request.method == 'GET':
+        try:
+            # Realiza la conexión a tu base de datos Oracle
+            dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
+            connection = cx_Oracle.connect(
+                user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+            # Crea un cursor
+            cursor = connection.cursor()
+
+            # Consulta SQL para obtener los datos por su ID
+            query = "SELECT ID_MARCA, nombre_marca FROM marcas WHERE ID_MARCA = :id_marca"
+
+            # Ejecuta la consulta con el ID_MARCA como parámetro
+            cursor.execute(query, id_marca=ID_MARCA)
+
+            # Obtiene los datos del marca
+            marca = cursor.fetchone()
+
+            # Cierra el cursor y la conexión
+            cursor.close()
+            connection.close()
+
+            if marca is None:
+                # Manejar el caso en el que no se encuentra el marca
+                flash('Marca no encontrada', 'danger')
+                # Redirige a la página de usuarios
+                return redirect(url_for('marc'))
+
+            return render_template('editBrands.html', marca=marca)
+
+        except Exception as e:
+            print("Error al obtener la marca:", str(e))
+            flash('Error al obtener la marca', 'danger')
+            # Redirige a la página de usuarios
+            return redirect(url_for('marc'))
+
+    elif request.method == 'POST':
+        try:
+            # Realiza la conexión a tu base de datos Oracle
+            dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
+            connection = cx_Oracle.connect(
+                user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+            # Crea un cursor
+            cursor = connection.cursor()
+
+            # Procesar el formulario de edición y actualizar los datos en la base de datos
+            nombre_marca = request.form.get('nombre_marca')
+
+            # Consulta SQL para actualizar los datos del usuario
+            query = "UPDATE marcas SET nombre_marca = :nombre_marca WHERE ID_MARCA = :id_marca"
+
+            # Ejecuta la consulta con los nuevos valores y el ID_CATEGORIA como parámetro
+            cursor.execute(query, nombre_marca=nombre_marca, id_marca=ID_MARCA)
+
+            # Confirma la transacción
+            connection.commit()
+
+            # Cierra el cursor y la conexión
+            cursor.close()
+            connection.close()
+
+            flash('Categoria actualizada con éxito', 'success')
+            # Redirige de nuevo a la página de marcas
+            return redirect(url_for('marc'))
+
+        except Exception as e:
+            print("Error al actualizar la marca:", str(e))
+            flash('Error al actualizar la marca', 'danger')
+            # Redirige a la página de usuarios
+            return redirect(url_for('marc'))
+
+@app.route('/eliminar_marca/<int:ID_MARCA>', methods=['POST', 'DELETE']) #ruta para eliminar marcas
+def eliminar_marca(ID_MARCA):
+    if request.method == 'POST' or request.form.get('_method') == 'DELETE':
+        # Lógica para eliminar de la base de datos Oracle
+        try:
+            cursor = connection.cursor()
+            cursor.execute("DELETE FROM MARCAS WHERE ID_MARCA = :ID_MARCA", {
+                           'ID_MARCA': ID_MARCA})
+            connection.commit()
+            flash('Marca eliminada con éxito', 'success')
+        except Exception as e:
+            flash('Error al eliminar la marca', 'danger')
+        finally:
+            cursor.close()
+
     return render_template('marc.html')
 
 @app.route('/admin/users')  # Ruta para la página de usuarios
@@ -194,7 +397,7 @@ def users():
     pagination = Pagination(page=page, per_page=per_page, total=total_users,
                             css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} categoria')
 
-    return render_template('users.html', usuarios=users_to_display, pagination=pagination)
+    return render_template('users.html', usuarios=users_to_display, pagination=pagination, roles=roles)
 
 # Ruta para insertar a Oracle los datos de usuario
 @app.route('/crear_usuario', methods=['POST'])

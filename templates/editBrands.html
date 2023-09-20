@@ -1,0 +1,28 @@
+{% extends 'baseDashboard.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center"> <!-- Centra el contenido horizontalmente -->
+        <div class="col-md-6"> <!-- Establece el ancho del formulario -->
+            <h2><i class="fa-solid fa-user-pen"></i>Editar Marca</h2>
+            <form action="{{ url_for('editBrands', ID_MARCA=marca[0]) }}" method="POST">
+                <!-- Campos de entrada para los datos del marca -->
+                <div class="form-group">
+                    <label for="nombre_marca"><i class="fas fa-user"></i> Nombre</label>
+                    <input type="text" class="form-control" id="nombre_marca" name="nombre_marca" value="{{ marca[1] }}">
+                </div>
+
+                <div class="btn-group" style="display: flex; justify-content: space-between;">
+                    <button type="submit" class="btn btn-primary" style="width: 50px;">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                    <a href="{{ url_for('marc') }}" class="btn btn-secondary" style="width: 50px;">
+                        <i class="fas fa-undo"></i> Regresar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -43,7 +43,7 @@
                         <div  class="button-container text-center" >                                                                                                      
                             <form action="{{ url_for('eliminar_categoria', ID_CATEGORIA=categoria[0]) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta Categoria?');">                                                                                    
                                 <!-- Botón Modificar -->
-                                <a href="{{ url_for('editCategory', ID_CATEGORIA=categoria[0]) }}" class="btn btn-info btn-sm">
+                                <a href="{{ url_for('editCategories', ID_CATEGORIA=categoria[0]) }}" class="btn btn-info btn-sm">
                                     <img src="{{ url_for('static', filename='img/edit.png') }}" alt="Editar" width="25" height="25">
                                 </a>                                                                                    
                                 <!-- Botón Eliminar -->                            
@@ -66,5 +66,37 @@
     {{ pagination.info }}
     {{ pagination.links }}
 </div>
+
+<!-- Aquí empieza Modal para crear categorias -->
+<div class="modal fade" id="nuevaCategoriaModal" tabindex="-1" role="dialog" aria-labelledby="nuevaCategoriaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="nuevaCategoriaModalLabel">
+                    <i class="fas fa-user-plus mr-2"></i> Nuevo Categoria
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('crear_categoria') }}" method="POST">
+                    
+                    <div class="form-group">
+                        <label for="nombre_categoria"><i class="fas fa-user"></i> Nombre:</label>
+                        <input type="text" class="form-control" id="nombre_categoria" name="nombre_categoria" required>
+                    </div>
+                    <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" >
+                    <i class="fas fa-check"></i> Guardar
+                </button>
+            </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- Aquí termina la ventana modal-->
 
 {% endblock %}
