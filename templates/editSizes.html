@@ -1,0 +1,28 @@
+{% extends 'baseDashboard.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center"> <!-- Centra el contenido horizontalmente -->
+        <div class="col-md-6"> <!-- Establece el ancho del formulario -->
+            <h2><i class="fa-solid fa-user-pen"></i>Editar Talla</h2>
+            <form action="{{ url_for('editSizes', ID_TALLA=talla[0]) }}" method="POST">
+                <!-- Campos de entrada para los datos del talla -->
+                <div class="form-group">
+                    <label for="nombre_talla"><i class="fas fa-user"></i> TALLA</label>
+                    <input type="text" class="form-control" id="nombre_talla" name="nombre_talla" value="{{ talla[1] }}">
+                </div>
+
+                <div class="btn-group" style="display: flex; justify-content: space-between;">
+                    <button type="submit" class="btn btn-primary" style="width: 50px;">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                    <a href="{{ url_for('sizes') }}" class="btn btn-secondary" style="width: 50px;">
+                        <i class="fas fa-undo"></i> Regresar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
