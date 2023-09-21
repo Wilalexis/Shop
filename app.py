@@ -101,7 +101,7 @@ def category():
     page = request.args.get('page', type=int, default=1)
     per_page = request.args.get('per_page', type=int, default=5)
 
-    # Supongamos que tienes una lista de usuarios llamada 'categorias'
+    # Supongamos que tienes una lista de categorias llamada 'categorias'
     total_category = len(categorias)
 
     # Calcula el índice de inicio y final para la página actual
@@ -113,7 +113,7 @@ def category():
 
     # Crea un objeto de paginación
     pagination = Pagination(page=page, per_page=per_page, total=total_category,
-                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
+                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} categorias')
 
 
     return render_template('category.html', categorias=category_to_display, pagination=pagination)
@@ -226,7 +226,7 @@ def eliminar_categoria(ID_CATEGORIA):
         finally:
             cursor.close()
 
-    return render_template('category.html')
+    return redirect(url_for('category'))
 
 @app.route('/admin/marc')
 def marc():
@@ -364,7 +364,7 @@ def eliminar_marca(ID_MARCA):
         finally:
             cursor.close()
 
-    return render_template('marc.html')
+    return redirect(url_for('marc'))
 
 @app.route('/admin/sizes') # Ruta para la pagina de tallas
 def sizes():
@@ -378,7 +378,7 @@ def sizes():
     page = request.args.get('page', type=int, default=1)
     per_page = request.args.get('per_page', type=int, default=5)
 
-    # Supongamos que tienes una lista de usuarios llamada 'tallas'
+    # Supongamos que tienes una lista de tallas llamada 'tallas'
     total_sizes = len(tallas)
 
     # Calcula el índice de inicio y final para la página actual
@@ -390,7 +390,7 @@ def sizes():
 
     # Crea un objeto de paginación
     pagination = Pagination(page=page, per_page=per_page, total=total_sizes,
-                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
+                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} tallas')
     
     return render_template('sizes.html', tallas=sizes_to_display, pagination=pagination) 
 
@@ -400,7 +400,7 @@ def crear_talla():
     nombre_talla = request.form.get('nombre_talla')
 
     # Preparar la consulta SQL
-    sql = "INSERT INTO tallas (nombre_tallas) VALUES (:nombre_talla)"
+    sql = "INSERT INTO tallas (nombre_talla) VALUES (:nombre_talla)"
 
     # Ejecutar la consulta
     cursor = connection.cursor()
@@ -468,7 +468,7 @@ def editSizes(ID_TALLA):
             query = "UPDATE tallas SET nombre_talla = :nombre_talla WHERE ID_talla = :id_tallas"
 
             # Ejecuta la consulta con los nuevos valores y el ID_TALLAS como parámetro
-            cursor.execute(query, nombre_talla=nombre_talla, id_marca=ID_TALLA)
+            cursor.execute(query, nombre_talla=nombre_talla, id_tallas=ID_TALLA)
 
             # Confirma la transacción
             connection.commit()
@@ -502,8 +502,7 @@ def eliminar_talla(ID_TALLA):
         finally:
             cursor.close()
 
-    return render_template('sizes.html')
-
+    return redirect(url_for('sizes'))
 
 @app.route('/admin/users')  # Ruta para la página de usuarios
 def users():
@@ -725,7 +724,7 @@ def products():
     products_to_display = productos[start:end]
 
     # Crea un objeto de paginación
-    pagination = Pagination(page=page, per_page=per_page, total=total_products, css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} usuarios')
+    pagination = Pagination(page=page, per_page=per_page, total=total_products, css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} productos')
 
     return render_template('products.html', productos=products_to_display, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, pagination=pagination)
 
