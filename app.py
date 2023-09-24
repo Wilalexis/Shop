@@ -6,6 +6,8 @@ from flask_bootstrap import Bootstrap
 import cx_Oracle
 import os
 import time
+import psycopg2
+
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = 'admin'  # clave secreta
@@ -742,31 +744,15 @@ def editProducts(ID_PRODUCTO):
             # Redirige a la página de productos
             return redirect(url_for('products'))
 
-@app.route('/eliminar_producto/<int:ID_PRODUCTO>', methods=['POST', 'DELETE'])
-def eliminar_producto(ID_PRODUCTO):
-    if request.method == 'POST' or request.form.get('_method') == 'DELETE':
-        # Lógica para eliminar el producto de la base de datos Oracle
-        try:
-            cursor = connection.cursor()
-            cursor.execute("DELETE FROM PRODUCTOS WHERE ID_PRODUCTO = :ID_PRODUCTO", {
-                           'ID_PRODUCTO': ID_PRODUCTO})
-            connection.commit()
-            flash('Producto eliminado con éxito', 'success')
-        except Exception as e:
-            flash('Error al eliminar el producto', 'danger')
-        finally:
-            cursor.close()
-
-    return redirect(url_for('products'))
-
 @app.route('/registerUser', methods=['POST'])
 def registerUser():
     # Obtén los valores de los campos del formulario
-    nombre = request.form.get('nombre')
+    nombre_cliente = request.form.get('nombre_cliente')
+    direccion = request.form.get('direccion')
+    nit = request.form.get('nit')
     correo = request.form.get('correo')
     contrasena = request.form.get('contrasena')
     confirmarContrasena = request.form.get('confirmarContrasena')
-    id_rol = 2
 
     # Inicializa un mensaje y un tipo de mensaje predeterminado
     message = None
@@ -774,30 +760,51 @@ def registerUser():
 
     # Verifica si las contraseñas coinciden
     if contrasena == confirmarContrasena:
-        # Las contraseñas coinciden, puedes proceder a almacenarla en la base de datos
-        # Aquí deberías insertar el código para almacenar el usuario en la base de datos
-        sql = "INSERT INTO usuarios (nombre, correo, contrasena, id_rol) VALUES (:nombre, :correo, :contrasena, :id_rol)"
+        try:
+             # Inicia una transacción
+            connection.begin()
 
-        # Ejecutar la consulta
-        cursor = connection.cursor()
-        cursor.execute(sql, {'nombre': nombre, 'correo': correo,
-                             'contrasena': contrasena, 'id_rol': id_rol})
-        connection.commit()
+            # Inserta los datos en la tabla 'login' para obtener el valor autoincremental de 'id_login'
+            cursor = connection.cursor()
+            cursor.execute("INSERT INTO login (correo, contrasena, id_rol) VALUES (:correo, :contrasena, :id_rol)",
+                           {'correo': correo, 'contrasena': contrasena, 'id_rol': 2})
+            
+            # Obtiene el valor de 'id_login' generado
+            cursor.execute("SELECT id_login FROM login WHERE correo = :correo", {'correo': correo})
+            row = cursor.fetchone()
+            new_id_login = row[0]
 
-        message = 'Usuario registrado con éxito'
+            # Inserta los datos en la tabla 'clientes' usando 'id_login' obtenido
+            cursor.execute("INSERT INTO clientes (nombre_cliente, direccion, nit, correo, id_login) VALUES (:nombre_cliente, :direccion, :nit, :correo, :id_login)",
+                           {'nombre_cliente': nombre_cliente, 'direccion': direccion, 'nit': nit, 'correo': correo, 'id_login': new_id_login})
 
-        # Establece los valores de los campos en blanco
-        nombre = ''
-        correo = ''
-        contrasena = ''
-        confirmarContrasena = ''
+            # Confirma la transacción
+            connection.commit()
+
+            message = 'Usuario registrado con éxito'
+
+            # Establece los valores de los campos en blanco
+            nombre_cliente = ''
+            direccion = ''
+            nit = ''
+            correo = ''
+            contrasena = ''
+            confirmarContrasena = ''
+
+        except Exception as e:
+            # Si ocurre un error, muestra un mensaje de error
+            message = 'Error al registrar el usuario: ' + str(e)
+            message_type = 'error'
+            connection.rollback()
+            print(e)
+
     else:
         # Las contraseñas no coinciden, muestra un mensaje de error al usuario
         message = 'Las contraseñas no coinciden, por favor inténtalo de nuevo'
         message_type = 'error'
 
     # Devuelve la plantilla de registro con los valores de los campos y el mensaje
-    return render_template('register.html', nombre=nombre, correo=correo, message=message, message_type=message_type)
+    return render_template('register.html', nombre_cliente=nombre_cliente, direccion=direccion, nit=nit, correo=correo, message=message, message_type=message_type)
 
 @app.route('/buscar_productos', methods=['POST'])
 def buscar_productos():
