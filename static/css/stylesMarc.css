@@ -33,6 +33,7 @@
     content: "\f070"; /* Código Unicode para el ícono de línea diagonal */
 }
 
+
 /* Estilo para la paginación de Bootstrap 4 */
 .pagination {
     display: flex;
@@ -50,4 +51,14 @@
     background-color: transparent;
     border: 1px solid #dee2e6; /* Borde del enlace de la página */
     border-radius: 4px;
+}
+
+.page-link:hover {
+    background-color: #f8f9fa; /* Color de fondo cuando se pasa el mouse */
+}
+
+.page-item.active .page-link {
+    background-color: #007bff; /* Color de fondo del enlace de la página activa */
+    border-color: #007bff; /* Color del borde del enlace de la página activa */
+    color: #fff; /* Color del texto del enlace de la página activa */
 }

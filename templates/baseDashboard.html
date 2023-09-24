@@ -34,7 +34,7 @@
         <a href="#"><i class="fas fa-users"></i> Clientes</a>
         <a href="{{ url_for('marc') }}"><i class="fas fa-tags"></i> Marcas</a>
         <a href="#"><i class="fas fa-receipt"></i> Recibos</a>
-        <a href="#"><i class="fas fa-tshirt"></i> Tallas</a>
+        <a href="{{ url_for('sizes') }}"><i class="fas fa-tshirt"></i> Tallas</a>
         <a href="#"><i class="fas fa-file-alt"></i> Generar reporte</a>
         <a href="#"><i class="fas fa-cog"></i> Configuración</a>
         <a href="#"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
@@ -52,5 +52,8 @@
     <script src="{{ url_for('static', filename='js/scriptEditarCategory.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scriptMarc.js')}}"></script>
     <script src="{{ url_for('static', filename='js/scriptEditarMarc.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scriptProducts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scriptCategories.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scriptBrands.js') }}"></script>
 </body>
 </html>
