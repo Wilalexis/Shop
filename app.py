@@ -19,8 +19,33 @@ connection = cx_Oracle.connect(user='USR_DLSOCKS', password='admin', dsn=dsn)
 class DeleteForm(FlaskForm):
     _method = HiddenField()
 
-# Rutas
-@app.route('/')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        correo = request.form.get('correo')
+        contrasena = request.form.get('contrasena')
+
+        cursor = connection.cursor()
+        cursor.execute("SELECT id_login, id_rol FROM login WHERE correo = :correo AND contrasena = :contrasena",
+                       {'correo': correo, 'contrasena': contrasena})
+        row = cursor.fetchone()
+
+        if row:
+            id_login, id_rol = row
+            session['id_login'] = id_login
+            session['id_rol'] = id_rol
+
+            if id_rol == 1:
+                return redirect(url_for('dashboard'))
+            elif id_rol == 2:
+                return redirect(url_for('buy'))
+        
+        # Si no se encontraron coincidencias, muestra un mensaje de error
+        return render_template('login.html', message='Credenciales incorrectas')
+
+    return render_template('login.html')
+
+@app.route('/') # Ruta para index.html
 def index():
     return render_template('index.html')
 
@@ -29,12 +54,6 @@ def index():
 def contact():
     return render_template('contact.html')
 
-
-@app.route('/login')  # Ruta para la página de login
-def login():
-    return render_template('login.html')
-
-
 @app.route('/register')  # Ruta para la página de registro
 def register():
     return render_template('register.html')
@@ -42,7 +61,11 @@ def register():
 
 @app.route('/dashboard')  # Ruta para la página de adminstrador
 def dashboard():
-    return render_template('dashboard.html')
+    # Verifica si el usuario tiene una sesión activa y tiene el rol 1 (administrador)
+    if 'id_login' in session and session['id_rol'] == 1:
+        return render_template('dashboard.html')
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route('/shoppingcart')  # Ruta para la página de carrito de compras
@@ -51,29 +74,40 @@ def shoppingcart():
 
 @app.route('/buy') # Ruta para la página de compras
 def buy():
-    cursor = connection.cursor()
-    cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA ORDER BY P.ID_PRODUCTO DESC")
-    productos = cursor.fetchall()
-    cursor.close()
+    # Verifica si el usuario tiene una sesión activa y tiene el rol 2 (comprador)
+    if 'id_login' in session and session['id_rol'] == 2:
+        # Obtén los productos
+        cursor = connection.cursor()
+        cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA ORDER BY P.ID_PRODUCTO DESC")
+        productos = cursor.fetchall()
+        cursor.close()
 
-    cursor1 = connection.cursor()
-    cursor1.execute("SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
-    tallasproductos = cursor1.fetchall()
-    cursor1.close()
+        # Obtén las tallas
+        cursor1 = connection.cursor()
+        cursor1.execute("SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
+        tallasproductos = cursor1.fetchall()
+        cursor1.close()
 
-    cursor2 = connection.cursor()
-    cursor2.execute("SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
-    categoriasproductos = cursor2.fetchall()
-    cursor2.close()
+        # Obtén las categorías
+        cursor2 = connection.cursor()
+        cursor2.execute("SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
+        categoriasproductos = cursor2.fetchall()
+        cursor2.close()
 
-    cursor3 = connection.cursor()
-    cursor3.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
-    marcasproductos = cursor3.fetchall()
-    cursor3.close()
+        # Obtén las marcas
+        cursor3 = connection.cursor()
+        cursor3.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
+        marcasproductos = cursor3.fetchall()
+        cursor3.close()
 
-    timestamp = int(time.time())
+        # Obtén el timestamp actual
+        timestamp = int(time.time())
 
-    return render_template('buy.html', productos=productos, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, timestamp=timestamp)
+        # Devuelve la plantilla de compras con los datos obtenidos
+        return render_template('buy.html', productos=productos, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, timestamp=timestamp)
+    else:
+        return redirect(url_for('login'))
+
 
 @app.route('/carrito')
 def ver_carrito():
@@ -882,7 +916,7 @@ def editProducts(ID_PRODUCTO):
             # Redirige a la página de productos
             return redirect(url_for('products'))
 
-@app.route('/registerUser', methods=['POST'])
+@app.route('/registerUser', methods=['POST'])#Función para registrar un nuevo cliente
 def registerUser():
     # Obtén los valores de los campos del formulario
     nombre_cliente = request.form.get('nombre_cliente')
