@@ -16,34 +16,56 @@ app.secret_key = 'admin'  # clave secreta
 dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
 connection = cx_Oracle.connect(user='USR_DLSOCKS', password='admin', dsn=dsn)
 
+#   session['logged_in'] = True
+
 class DeleteForm(FlaskForm):
     _method = HiddenField()
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        correo = request.form.get('correo')
-        contrasena = request.form.get('contrasena')
+        correo = request.form['correo']
+        contrasena = request.form['contrasena']
 
+        # Busca el usuario en la tabla 'login' con el correo y contraseña proporcionados
         cursor = connection.cursor()
         cursor.execute("SELECT id_login, id_rol FROM login WHERE correo = :correo AND contrasena = :contrasena",
                        {'correo': correo, 'contrasena': contrasena})
-        row = cursor.fetchone()
+        user = cursor.fetchone()
 
-        if row:
-            id_login, id_rol = row
-            session['id_login'] = id_login
-            session['id_rol'] = id_rol
+        if user:
+            id_login, id_rol = user
 
-            if id_rol == 1:
-                return redirect(url_for('dashboard'))
-            elif id_rol == 2:
+            if id_rol == 2:
+                # Usuario con rol 2, redirige a buy.html
+                session['id_login'] = id_login  # Almacena el ID de inicio de sesión en la sesión
                 return redirect(url_for('buy'))
-        
-        # Si no se encontraron coincidencias, muestra un mensaje de error
-        return render_template('login.html', message='Credenciales incorrectas')
+            else:
+                # Usuario con rol 1, redirige a dashboard.html
+                session['id_login'] = id_login  # Almacena el ID de inicio de sesión en la sesión
+                return redirect(url_for('dashboard'))
+        else:
+            # El usuario no se encontró en la tabla 'login', busca en la tabla 'usuarios'
+            cursor.execute("SELECT id_rol FROM usuarios WHERE correo = :correo", {'correo': correo})
+            user_rol = cursor.fetchone()
+
+            if user_rol and user_rol[0] == 1:
+                # Usuario con rol 1, redirige a dashboard.html
+                return redirect(url_for('dashboard'))
+
+        # Si ninguna coincidencia se encontró, muestra un mensaje de error
+        error_message = 'Usuario no encontrado'
+        return render_template('login.html', error_message=error_message)
 
     return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    # Elimina la información de la sesión del usuario
+    session.pop('id_login', None)  # Elimina la clave 'id_login' de la sesión si existe
+
+    # Redirige al usuario a la página de inicio de sesión
+    return redirect(url_for('login'))
 
 @app.route('/') # Ruta para index.html
 def index():
@@ -59,10 +81,14 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/dashboard')  # Ruta para la página de adminstrador
+@app.route('/dashboard')
 def dashboard():
-    # Verifica si el usuario tiene una sesión activa y tiene el rol 1 (administrador)
-    if 'id_login' in session and session['id_rol'] == 1:
+    # Verifica si el usuario tiene una sesión válida y el rol correcto
+    if 'id_login' in session:
+        id_login = session['id_login']
+
+        # Realiza cualquier otra lógica que necesites aquí
+
         return render_template('dashboard.html')
     else:
         return redirect(url_for('login'))
@@ -72,10 +98,12 @@ def dashboard():
 def shoppingcart():
     return render_template('shoppingcart.html')
 
-@app.route('/buy') # Ruta para la página de compras
+@app.route('/buy')
 def buy():
-    # Verifica si el usuario tiene una sesión activa y tiene el rol 2 (comprador)
-    if 'id_login' in session and session['id_rol'] == 2:
+    # Verifica si el usuario tiene una sesión válida y el rol correcto
+    if 'id_login' in session:
+        id_login = session['id_login']
+
         # Obtén los productos
         cursor = connection.cursor()
         cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA ORDER BY P.ID_PRODUCTO DESC")
@@ -107,6 +135,7 @@ def buy():
         return render_template('buy.html', productos=productos, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, timestamp=timestamp)
     else:
         return redirect(url_for('login'))
+
 
 
 @app.route('/carrito')
