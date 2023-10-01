@@ -3,6 +3,19 @@ const togglePassword = document.querySelector('.toggle-password');
 const passwordField = togglePassword.closest('.input-group').querySelector('input');
 const showPasswordIcon = togglePassword.querySelector('.show-password-icon');
 
+// function togglePasswordVisibility() {
+//     var passwordField = document.getElementById("password-field");
+//     var passwordInput = document.getElementById("password-input");
+
+//     if (passwordInput.style.display === "none") {
+//         passwordField.style.display = "none";
+//         passwordInput.style.display = "inline";
+//     } else {
+//         passwordField.style.display = "inline";
+//         passwordInput.style.display = "none";
+//     }
+// }
+
 togglePassword.addEventListener('click', () => {
     if (passwordField.type === 'password') {
         passwordField.type = 'text';

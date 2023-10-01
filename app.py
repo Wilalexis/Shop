@@ -6,7 +6,7 @@ from flask_bootstrap import Bootstrap
 import cx_Oracle
 import os
 import time
-import psycopg2
+#import psycopg2
 
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -292,6 +292,52 @@ def eliminar_categoria(ID_CATEGORIA):
             cursor.close()
 
     return redirect(url_for('category'))
+
+@app.route('/admin/client')
+def client():
+    cursor = connection.cursor()
+    cursor.execute("SELECT clientes.id_cliente,clientes.nombre_cliente,clientes.direccion,clientes.nit,clientes.correo,login.contrasena FROM clientes INNER JOIN login ON clientes.id_login = login.id_login")
+    #cursor.execute("SELECT U.ID_CLIENTE, U.NOMBRE_CLIENTE, U.DIRECCION, U.NIT, U.CORREO, U.ID_LOGIN FROM CLIENTES U JOIN LOGIN R ON U.ID_LOGIN = R.ID_LOGIN")
+    clientes = cursor.fetchall()
+    cursor.close()
+
+    cursor1 = connection.cursor()
+    cursor1.execute("SELECT ID_LOGIN, CONTRASENA FROM LOGIN")
+    login = cursor1.fetchall()
+    cursor1.close()
+
+    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+    page = request.args.get('page', type=int, default=1)
+    per_page = request.args.get('per_page', type=int, default=5)
+
+    # Supongamos que tienes una lista de clientes llamada 'clientes'
+    total_clients = len(clientes)
+
+    # Calcula el índice de inicio y final para la página actual
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    #obtiene las clientes actuales
+    clients_to_display = clientes[start:end]
+
+    # Crea un objeto de paginación
+    pagination = Pagination(page=page, per_page=per_page, total=total_clients,
+                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} clientes')
+    
+    
+    return render_template('client.html', clientes=clients_to_display, pagination=pagination, login = login)
+
+@app.route('/crear_cliente', methods=['POST'])
+def crear_client():
+    return redirect(url_for('client'))
+
+@app.route('/eliminar_client', methods=['POST'])
+def eliminar_client():
+    return redirect(url_for('client'))
+
+@app.route('/editClient', methods=['POST'])
+def editClient():
+    return redirect(url_for('client'))
 
 @app.route('/admin/marc')
 def marc():
@@ -944,6 +990,23 @@ def editProducts(ID_PRODUCTO):
             flash('Error al actualizar el producto', 'danger')
             # Redirige a la página de productos
             return redirect(url_for('products'))
+
+@app.route('/eliminar_producto/<int:ID_PRODUCTO>', methods=['POST', 'DELETE'])
+def eliminar_producto(ID_PRODUCTO):
+    if request.method == 'POST' or request.form.get('_method') == 'DELETE':
+        # Lógica para eliminar el usuario de la base de datos Oracle
+        try:
+            cursor = connection.cursor()
+            cursor.execute("DELETE FROM PRODUCTOS WHERE ID_PRODUCTO = :ID_PRODCUTO", {
+                           'ID_PRODUCTO': ID_PRODUCTO})
+            connection.commit()
+            flash('PRODCUTO eliminado con éxito', 'success')
+        except Exception as e:
+            flash('Error al eliminar el usuario', 'danger')
+        finally:
+            cursor.close()
+
+    return redirect(url_for('products'))
 
 @app.route('/registerUser', methods=['POST'])#Función para registrar un nuevo cliente
 def registerUser():
