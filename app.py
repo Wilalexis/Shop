@@ -329,15 +329,128 @@ def client():
 
 @app.route('/crear_cliente', methods=['POST'])
 def crear_client():
+    nombre = request.form.get('nombre')
+    direccion = request.form.get('direccion')
+    nit = request.form.get('nit')
+    correo = request.form.get('correo')
+    contrasena = request.form.get('contrasena')
+    id_cliente = request.form.get('id_cliente')
+
+    # Preparar la consulta SQL
+    sql = "INSERT INTO cliente (nombre, direccion, nit, correo, contrasena, id_cliente) VALUES (:nombre, :direccion, :nit, :correo, :contrasena, :id_login)"
+
+    # Ejecutar la consulta
+    cursor = connection.cursor()
+    cursor.execute(sql, {'nombre': nombre, 'direccion':direccion,'nit':nit ,'correo': correo, 'contrasena': contrasena, 'id_cliente': id_cliente})
+    connection.commit()
+
+    # variable de sesion
+    session['mensaje'] = 'cliente agregado correctamente'
+
     return redirect(url_for('client'))
 
-@app.route('/eliminar_client', methods=['POST'])
-def eliminar_client():
+@app.route('/eliminar_client/<int:ID_CLIENTE>', methods=['POST', 'DELETE'])
+def eliminar_client(ID_CLIENTE):
+    if request.method == 'POST' or request.form.get('_method') == 'DELETE':
+        # Lógica para eliminar el usuario de la base de datos Oracle
+        try:
+            cursor = connection.cursor()
+            cursor.execute("DELETE FROM CLIENTE WHERE ID_CLIENTE = :ID_CLIENTE", {
+                           'ID_CLIENTE': ID_CLIENTE})
+            connection.commit()
+            flash('cliente eliminado con éxito', 'success')
+        except Exception as e:
+            flash('Error al eliminar el cliente', 'danger')
+        finally:
+            cursor.close()
+            
     return redirect(url_for('client'))
 
 @app.route('/editClient', methods=['POST'])
-def editClient():
-    return redirect(url_for('client'))
+def editClient(ID_CLIENTE):
+    if request.method == 'GET':
+        try:
+            # Realiza la conexión a tu base de datos Oracle
+            dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
+            connection = cx_Oracle.connect(
+                user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+            # Crea un cursor
+            cursor = connection.cursor()
+
+            # Consulta SQL para obtener los datos del usuario por su ID
+            query = "SELECT ID_CLIENTE, nombre, direccion, nit, correo, contrasena, id_login FROM usuarios WHERE ID_CLIENTE = :id_cliente"
+
+            # Ejecuta la consulta con el ID_USUARIO como parámetro
+            cursor.execute(query, id_cliente=ID_CLIENTE)
+
+            # Obtiene los datos del usuario
+            cliente = cursor.fetchone()
+
+            # Cierra el cursor y la conexión
+            cursor.close()
+
+            cursor1 = connection.cursor()
+            cursor1.execute("SELECT ID_LOGIN, CONTRASENA FROM ROLES")
+            roles = cursor1.fetchall()
+            cursor1.close()
+            connection.close()
+
+            if cliente is None:
+                # Manejar el caso en el que no se encuentra el usuario
+                flash('Usuario no encontrado', 'danger')
+                # Redirige a la página de usuarios
+                return redirect(url_for('users'))
+
+            return render_template('editClient.html', cliente=cliente, roles=roles)
+        
+        except Exception as e:
+            print("Error al obtener el cliente:", str(e))
+            flash('Error al obtener el cliente', 'danger')
+            # Redirige a la página de usuarios
+            return redirect(url_for('clients'))
+
+    elif request.method == 'POST':
+        try:
+            # Realiza la conexión a tu base de datos Oracle
+            dsn = cx_Oracle.makedsn(host='localhost', port=1521, sid='xe')
+            connection = cx_Oracle.connect(
+                user='USR_DLSOCKS', password='admin', dsn=dsn)
+
+            # Crea un cursor
+            cursor = connection.cursor()
+
+            # Procesar el formulario de edición y actualizar los datos en la base de datos
+            nombre = request.form.get('nombre')
+            direccion = request.form('direccion')
+            nit = request.form('nit')
+            correo = request.form.get('correo')
+            contrasena = request.form.get('contrasena')
+            id_login = request.form.get('id_login')
+
+            # Consulta SQL para actualizar los datos del usuario
+            query = "UPDATE clientes SET nombre = :nombre, direccion = :direccion, nit = :nit, correo = :correo, contrasena = :contrasena, id_login = :id_login WHERE ID_CLIENTES = :id_CLIENTES"
+
+            # Ejecuta la consulta con los nuevos valores y el ID_USUARIO como parámetro
+            cursor.execute(query, nombre=nombre, correo=correo, direccion=direccion, nit=nit,
+                           contrasena=contrasena, id_login=id_login, ID_CLIENTE=ID_CLIENTE)
+
+            # Confirma la transacción
+            connection.commit()
+
+            # Cierra el cursor y la conexión
+            cursor.close()
+            connection.close()
+
+            flash('Usuario actualizado con éxito', 'success')
+            # Redirige de nuevo a la página de usuarios
+            return redirect(url_for('client'))
+
+        except Exception as e:
+            print("Error al actualizar el cliente:", str(e))
+            flash('Error al actualizar el cliente', 'danger')
+            # Redirige a la página de usuarios
+            return redirect(url_for('client'))
 
 @app.route('/admin/marc')
 def marc():
