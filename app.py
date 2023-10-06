@@ -18,56 +18,58 @@ connection = cx_Oracle.connect(user='USR_DLSOCKS', password='admin', dsn=dsn)
 
 #   session['logged_in'] = True
 
+
 class DeleteForm(FlaskForm):
     _method = HiddenField()
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        correo = request.form['correo']
-        contrasena = request.form['contrasena']
+            correo = request.form['correo']
+            contrasena = request.form['contrasena']
 
-        # Busca el usuario en la tabla 'login' con el correo y contraseña proporcionados
-        cursor = connection.cursor()
-        cursor.execute("SELECT id_login, id_rol FROM login WHERE correo = :correo AND contrasena = :contrasena",
-                       {'correo': correo, 'contrasena': contrasena})
-        user = cursor.fetchone()
-
-        if user:
-            id_login, id_rol = user
-
-            if id_rol == 2:
-                # Usuario con rol 2, redirige a buy.html
-                session['id_login'] = id_login  # Almacena el ID de inicio de sesión en la sesión
-                return redirect(url_for('buy'))
+            cursor = connection.cursor()
+            cursor.execute("SELECT id_login, id_rol FROM login WHERE correo = :correo AND contrasena = :contrasena",
+                           {'correo': correo, 'contrasena': contrasena})
+            user = cursor.fetchone() 
+            if user:
+                id_rol_u = user  
+                if id_rol_u == 2:
+                    session['id_rol'] = id_rol_u
+                    return redirect(url_for('buy'))
+                else:
+                    session['id_rol'] = id_rol_u
+                    return redirect(url_for('dashboard'))
             else:
-                # Usuario con rol 1, redirige a dashboard.html
-                session['id_login'] = id_login  # Almacena el ID de inicio de sesión en la sesión
-                return redirect(url_for('dashboard'))
-        else:
-            # El usuario no se encontró en la tabla 'login', busca en la tabla 'usuarios'
-            cursor.execute("SELECT id_rol FROM usuarios WHERE correo = :correo", {'correo': correo})
-            user_rol = cursor.fetchone()
-
-            if user_rol and user_rol[0] == 1:
-                # Usuario con rol 1, redirige a dashboard.html
-                return redirect(url_for('dashboard'))
-
-        # Si ninguna coincidencia se encontró, muestra un mensaje de error
-        error_message = 'Usuario no encontrado'
-        return render_template('login.html', error_message=error_message)
+                cursor.execute("SELECT id_rol FROM usuarios WHERE correo = :correo AND contrasena = :contrasena", {'correo': correo, 'contrasena': contrasena})
+                user_rol = cursor.fetchone()
+    
+                if user_rol:
+                    id_rol = user_rol[0]
+                    print("id_rol:", id_rol)
+    
+                    if id_rol == 1:
+                        session['id_rol'] = id_rol
+                        return redirect(url_for('dashboard'))
+                    else:
+                        session['id_rol'] = id_rol
+                        return redirect(url_for('buy'))
 
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
     # Elimina la información de la sesión del usuario
-    session.pop('id_login', None)  # Elimina la clave 'id_login' de la sesión si existe
+    # Elimina la clave 'id_login' de la sesión si existe
+    session.pop('id_login', None)
 
     # Redirige al usuario a la página de inicio de sesión
     return redirect(url_for('login'))
 
-@app.route('/') # Ruta para index.html
+
+@app.route('/')  # Ruta para index.html
 def index():
     return render_template('index.html')
 
@@ -75,6 +77,7 @@ def index():
 @app.route('/contact')  # Ruta para la página de contacto
 def contact():
     return render_template('contact.html')
+
 
 @app.route('/register')  # Ruta para la página de registro
 def register():
@@ -84,9 +87,10 @@ def register():
 @app.route('/dashboard')
 def dashboard():
     # Verifica si el usuario tiene una sesión válida y el rol correcto
-    if 'id_login' in session:
-        id_login = session['id_login']
-
+    if 'id_rol' in session:
+        id_rol_u = session['id_rol']
+    if 'id_rol' in session:
+        id_rol = session['id_rol']
         # Realiza cualquier otra lógica que necesites aquí
 
         return render_template('dashboard.html')
@@ -98,12 +102,14 @@ def dashboard():
 def shoppingcart():
     return render_template('shoppingcart.html')
 
+
 @app.route('/buy')
 def buy():
     # Verifica si el usuario tiene una sesión válida y el rol correcto
-    if 'id_login' in session:
-        id_login = session['id_login']
-
+    if 'id_rol' in session:
+        id_rol_u = session['id_rol']
+    if 'id_rol' in session:
+        id_rol = session['id_rol']
         # Obtén los productos
         cursor = connection.cursor()
         cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA ORDER BY P.ID_PRODUCTO DESC")
@@ -118,7 +124,8 @@ def buy():
 
         # Obtén las categorías
         cursor2 = connection.cursor()
-        cursor2.execute("SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
+        cursor2.execute(
+            "SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
         categoriasproductos = cursor2.fetchall()
         cursor2.close()
 
@@ -137,24 +144,26 @@ def buy():
         return redirect(url_for('login'))
 
 
-
 @app.route('/carrito')
 def ver_carrito():
     carrito = []
     if 'carrito' in session:
         for producto_id in session['carrito']:
             cursor = connection.cursor()
-            cursor.execute("SELECT * FROM productos WHERE id = :id", {'id': producto_id})
+            cursor.execute(
+                "SELECT * FROM productos WHERE id = :id", {'id': producto_id})
             producto = cursor.fetchone()
             carrito.append(producto)
     return render_template('carrito.html', carrito=carrito)
+
 
 @app.route('/limpiar_carrito')
 def limpiar_carrito():
     session.pop('carrito', None)
     return redirect(url_for('index'))
 
-@app.route('/admin/category') # ruta para la pagina categorias
+
+@app.route('/admin/category')  # ruta para la pagina categorias
 def category():
     cursor = connection.cursor()
     cursor.execute(
@@ -173,17 +182,18 @@ def category():
     start = (page - 1) * per_page
     end = start + per_page
 
-    #obtiene las categorias actuales
+    # obtiene las categorias actuales
     category_to_display = categorias[start:end]
 
     # Crea un objeto de paginación
     pagination = Pagination(page=page, per_page=per_page, total=total_category,
                             css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} categorias')
 
-
     return render_template('category.html', categorias=category_to_display, pagination=pagination)
 
 # Ruta para insertar a Oracle los datos de categoría
+
+
 @app.route('/crear_categoria', methods=['POST'])
 def crear_categoria():
     nombre_categoria = request.form.get('nombre_categoria')
@@ -201,7 +211,9 @@ def crear_categoria():
 
     return redirect(url_for('category'))
 
-@app.route('/editCategories/<int:ID_CATEGORIA>', methods=['GET', 'POST']) #ruta para editar categoria
+
+# ruta para editar categoria
+@app.route('/editCategories/<int:ID_CATEGORIA>', methods=['GET', 'POST'])
 def editCategories(ID_CATEGORIA):
     if request.method == 'GET':
         try:
@@ -257,7 +269,8 @@ def editCategories(ID_CATEGORIA):
             query = "UPDATE categorias SET nombre_categoria = :nombre_categoria WHERE ID_CATEGORIA = :id_categoria"
 
             # Ejecuta la consulta con los nuevos valores y el ID_CATEGORIA como parámetro
-            cursor.execute(query, nombre_categoria=nombre_categoria, id_categoria=ID_CATEGORIA)
+            cursor.execute(query, nombre_categoria=nombre_categoria,
+                           id_categoria=ID_CATEGORIA)
 
             # Confirma la transacción
             connection.commit()
@@ -276,7 +289,9 @@ def editCategories(ID_CATEGORIA):
             # Redirige a la página de usuarios
             return redirect(url_for('category'))
 
-@app.route('/eliminar_categoria/<int:ID_CATEGORIA>', methods=['POST', 'DELETE']) #ruta para eliminar categoria
+
+# ruta para eliminar categoria
+@app.route('/eliminar_categoria/<int:ID_CATEGORIA>', methods=['POST', 'DELETE'])
 def eliminar_categoria(ID_CATEGORIA):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
         # Lógica para eliminar de la base de datos Oracle
@@ -292,6 +307,7 @@ def eliminar_categoria(ID_CATEGORIA):
             cursor.close()
 
     return redirect(url_for('category'))
+
 
 @app.route('/admin/client')
 def client():
@@ -317,15 +333,15 @@ def client():
     start = (page - 1) * per_page
     end = start + per_page
 
-    #obtiene las clientes actuales
+    # obtiene las clientes actuales
     clients_to_display = clientes[start:end]
 
     # Crea un objeto de paginación
     pagination = Pagination(page=page, per_page=per_page, total=total_clients,
                             css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} clientes')
-    
-    
-    return render_template('client.html', clientes=clients_to_display, pagination=pagination, login = login)
+
+    return render_template('client.html', clientes=clients_to_display, pagination=pagination, login=login)
+
 
 @app.route('/crear_cliente', methods=['POST'])
 def crear_client():
@@ -341,13 +357,15 @@ def crear_client():
 
     # Ejecutar la consulta
     cursor = connection.cursor()
-    cursor.execute(sql, {'nombre': nombre, 'direccion':direccion,'nit':nit ,'correo': correo, 'contrasena': contrasena, 'id_cliente': id_cliente})
+    cursor.execute(sql, {'nombre': nombre, 'direccion': direccion, 'nit': nit,
+                   'correo': correo, 'contrasena': contrasena, 'id_cliente': id_cliente})
     connection.commit()
 
     # variable de sesion
     session['mensaje'] = 'cliente agregado correctamente'
 
     return redirect(url_for('client'))
+
 
 @app.route('/eliminar_client/<int:ID_CLIENTE>', methods=['POST', 'DELETE'])
 def eliminar_client(ID_CLIENTE):
@@ -363,8 +381,9 @@ def eliminar_client(ID_CLIENTE):
             flash('Error al eliminar el cliente', 'danger')
         finally:
             cursor.close()
-            
+
     return redirect(url_for('client'))
+
 
 @app.route('/editClient', methods=['POST'])
 def editClient(ID_CLIENTE):
@@ -403,7 +422,7 @@ def editClient(ID_CLIENTE):
                 return redirect(url_for('users'))
 
             return render_template('editClient.html', cliente=cliente, roles=roles)
-        
+
         except Exception as e:
             print("Error al obtener el cliente:", str(e))
             flash('Error al obtener el cliente', 'danger')
@@ -452,6 +471,7 @@ def editClient(ID_CLIENTE):
             # Redirige a la página de usuarios
             return redirect(url_for('client'))
 
+
 @app.route('/admin/marc')
 def marc():
     cursor = connection.cursor()
@@ -470,17 +490,18 @@ def marc():
     start = (page - 1) * per_page
     end = start + per_page
 
-    #obtiene las marcas actuales
+    # obtiene las marcas actuales
     brandas_to_display = marcas[start:end]
 
     # Crea un objeto de paginación
     pagination = Pagination(page=page, per_page=per_page, total=total_brands,
                             css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} marcas')
-    
-    
+
     return render_template('marc.html', marcas=brandas_to_display, pagination=pagination)
 
 # Ruta para insertar a Oracle los datos de marcas
+
+
 @app.route('/crear_marca', methods=['POST'])
 def crear_marca():
     nombre_marca = request.form.get('nombre_marca')
@@ -498,7 +519,9 @@ def crear_marca():
 
     return redirect(url_for('marc'))
 
-@app.route('/editBrands/<int:ID_MARCA>', methods=['GET', 'POST']) #ruta para editar marcas
+
+# ruta para editar marcas
+@app.route('/editBrands/<int:ID_MARCA>', methods=['GET', 'POST'])
 def editBrands(ID_MARCA):
     if request.method == 'GET':
         try:
@@ -573,7 +596,9 @@ def editBrands(ID_MARCA):
             # Redirige a la página de usuarios
             return redirect(url_for('marc'))
 
-@app.route('/eliminar_marca/<int:ID_MARCA>', methods=['POST', 'DELETE']) #ruta para eliminar marcas
+
+# ruta para eliminar marcas
+@app.route('/eliminar_marca/<int:ID_MARCA>', methods=['POST', 'DELETE'])
 def eliminar_marca(ID_MARCA):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
         # Lógica para eliminar de la base de datos Oracle
@@ -590,7 +615,8 @@ def eliminar_marca(ID_MARCA):
 
     return redirect(url_for('marc'))
 
-@app.route('/admin/sizes') # Ruta para la pagina de tallas
+
+@app.route('/admin/sizes')  # Ruta para la pagina de tallas
 def sizes():
     cursor = connection.cursor()
     cursor.execute(
@@ -609,16 +635,18 @@ def sizes():
     start = (page - 1) * per_page
     end = start + per_page
 
-    #obtiene las categorias actuales
+    # obtiene las categorias actuales
     sizes_to_display = tallas[start:end]
 
     # Crea un objeto de paginación
     pagination = Pagination(page=page, per_page=per_page, total=total_sizes,
                             css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} tallas')
-    
-    return render_template('sizes.html', tallas=sizes_to_display, pagination=pagination) 
+
+    return render_template('sizes.html', tallas=sizes_to_display, pagination=pagination)
 
 # Ruta para insertar a Oracle los datos de tallas
+
+
 @app.route('/crear_talla', methods=['POST'])
 def crear_talla():
     nombre_talla = request.form.get('nombre_talla')
@@ -636,7 +664,9 @@ def crear_talla():
 
     return redirect(url_for('sizes'))
 
-@app.route('/editSizes/<int:ID_TALLA>', methods=['GET', 'POST']) #ruta para editar tallas
+
+# ruta para editar tallas
+@app.route('/editSizes/<int:ID_TALLA>', methods=['GET', 'POST'])
 def editSizes(ID_TALLA):
     if request.method == 'GET':
         try:
@@ -692,7 +722,8 @@ def editSizes(ID_TALLA):
             query = "UPDATE tallas SET nombre_talla = :nombre_talla WHERE ID_talla = :id_tallas"
 
             # Ejecuta la consulta con los nuevos valores y el ID_TALLAS como parámetro
-            cursor.execute(query, nombre_talla=nombre_talla, id_tallas=ID_TALLA)
+            cursor.execute(query, nombre_talla=nombre_talla,
+                           id_tallas=ID_TALLA)
 
             # Confirma la transacción
             connection.commit()
@@ -711,7 +742,9 @@ def editSizes(ID_TALLA):
             # Redirige a la página de tallas
             return redirect(url_for('sizes'))
 
-@app.route('/eliminar_talla/<int:ID_TALLA>', methods=['POST', 'DELETE']) #ruta para eliminar Tallas
+
+# ruta para eliminar Tallas
+@app.route('/eliminar_talla/<int:ID_TALLA>', methods=['POST', 'DELETE'])
 def eliminar_talla(ID_TALLA):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
         # Lógica para eliminar de la base de datos Oracle
@@ -728,10 +761,12 @@ def eliminar_talla(ID_TALLA):
 
     return redirect(url_for('sizes'))
 
+
 @app.route('/admin/users')  # Ruta para la página de usuarios
 def users():
     cursor = connection.cursor()
-    cursor.execute("SELECT U.ID_USUARIO, U.NOMBRE, U.CORREO, U.CONTRASENA, R.NOMBRE_ROL FROM USUARIOS U JOIN ROLES R ON U.ID_ROL = R.ID_ROL")
+    cursor.execute(
+        "SELECT U.ID_USUARIO, U.NOMBRE, U.CORREO, U.CONTRASENA, R.NOMBRE_ROL FROM USUARIOS U JOIN ROLES R ON U.ID_ROL = R.ID_ROL")
     usuarios = cursor.fetchall()
     cursor.close()
 
@@ -762,6 +797,8 @@ def users():
     return render_template('users.html', usuarios=users_to_display, pagination=pagination, roles=roles)
 
 # Ruta para insertar a Oracle los datos de usuario
+
+
 @app.route('/crear_usuario', methods=['POST'])
 def crear_usuario():
     nombre = request.form.get('nombre')
@@ -783,6 +820,7 @@ def crear_usuario():
 
     return redirect(url_for('users'))
 
+
 @app.route('/eliminar_usuario/<int:ID_USUARIO>', methods=['POST', 'DELETE'])
 def eliminar_usuario(ID_USUARIO):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
@@ -799,6 +837,7 @@ def eliminar_usuario(ID_USUARIO):
             cursor.close()
 
     return redirect(url_for('users'))
+
 
 @app.route('/buscar_usuarios', methods=['POST'])
 def buscar_usuarios():
@@ -826,6 +865,7 @@ def buscar_usuarios():
 
     # Renderizar la página de resultados de búsqueda con los usuarios encontrados
     return render_template('resultadosBusquedaUsuario.html', usuarios=usuarios_encontrados)
+
 
 @app.route('/editUsers/<int:ID_USUARIO>', methods=['GET', 'POST'])
 def editUsers(ID_USUARIO):
@@ -911,6 +951,7 @@ def editUsers(ID_USUARIO):
             # Redirige a la página de usuarios
             return redirect(url_for('users'))
 
+
 @app.route('/admin/products')  # Ruta para la página de productos
 def products():
     cursor = connection.cursor()
@@ -948,11 +989,14 @@ def products():
     products_to_display = productos[start:end]
 
     # Crea un objeto de paginación
-    pagination = Pagination(page=page, per_page=per_page, total=total_products, css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} productos')
+    pagination = Pagination(page=page, per_page=per_page, total=total_products,
+                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} productos')
 
     return render_template('products.html', productos=products_to_display, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, pagination=pagination)
 
 # Ruta para insertar a Oracle los datos del producto
+
+
 @app.route('/crear_producto', methods=['POST'])
 def crear_producto():
     nombre_producto = request.form.get('nombre_producto')
@@ -987,6 +1031,7 @@ def crear_producto():
 
     return redirect(url_for('products'))
 
+
 @app.route('/editProducts/<int:ID_PRODUCTO>', methods=['GET', 'POST'])
 def editProducts(ID_PRODUCTO):
     if request.method == 'GET':
@@ -1017,7 +1062,8 @@ def editProducts(ID_PRODUCTO):
             cursor1.close()
 
             cursor2 = connection.cursor()
-            cursor2.execute("SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
+            cursor2.execute(
+                "SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
             categoriasproductos = cursor2.fetchall()
             cursor2.close()
 
@@ -1033,11 +1079,9 @@ def editProducts(ID_PRODUCTO):
                 # Redirige a la página de usuarios
                 return redirect(url_for('products'))
 
-
             return render_template('editProducts.html', producto=producto, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos)
 
-
-            #return render_template('editProducts.html', producto=producto)
+            # return render_template('editProducts.html', producto=producto)
 
         except Exception as e:
             print("Error al obtener el producto:", str(e))
@@ -1065,7 +1109,8 @@ def editProducts(ID_PRODUCTO):
             existencia = request.form.get('existencia')
 
             # Obtén la ruta de la imagen actual del producto
-            cursor.execute("SELECT imagen FROM productos WHERE ID_PRODUCTO = :id_producto", id_producto=ID_PRODUCTO)
+            cursor.execute(
+                "SELECT imagen FROM productos WHERE ID_PRODUCTO = :id_producto", id_producto=ID_PRODUCTO)
             resultado = cursor.fetchone()
             imagen_actual = resultado[0] if resultado else None
 
@@ -1084,7 +1129,7 @@ def editProducts(ID_PRODUCTO):
             query = "UPDATE productos SET nombre_producto = :nombre_producto, descripcion = :descripcion, id_talla = :id_talla, id_categoria = :id_categoria, id_marca = :id_marca, precio = :precio, existencia = :existencia, imagen = :imagen WHERE ID_PRODUCTO = :id_producto"
 
             # Ejecuta la consulta con los nuevos valores y el ID_PRODUCTO como parámetro
-            cursor.execute(query, nombre_producto=nombre_producto, descripcion=descripcion, id_talla=id_talla, id_categoria=id_categoria, 
+            cursor.execute(query, nombre_producto=nombre_producto, descripcion=descripcion, id_talla=id_talla, id_categoria=id_categoria,
                            id_marca=id_marca, precio=precio, existencia=existencia, imagen=ruta_imagen, id_producto=ID_PRODUCTO)
 
             # Confirma la transacción
@@ -1104,6 +1149,7 @@ def editProducts(ID_PRODUCTO):
             # Redirige a la página de productos
             return redirect(url_for('products'))
 
+
 @app.route('/eliminar_producto/<int:ID_PRODUCTO>', methods=['POST', 'DELETE'])
 def eliminar_producto(ID_PRODUCTO):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
@@ -1121,7 +1167,9 @@ def eliminar_producto(ID_PRODUCTO):
 
     return redirect(url_for('products'))
 
-@app.route('/registerUser', methods=['POST'])#Función para registrar un nuevo cliente
+
+# Función para registrar un nuevo cliente
+@app.route('/registerUser', methods=['POST'])
 def registerUser():
     # Obtén los valores de los campos del formulario
     nombre_cliente = request.form.get('nombre_cliente')
@@ -1138,16 +1186,17 @@ def registerUser():
     # Verifica si las contraseñas coinciden
     if contrasena == confirmarContrasena:
         try:
-             # Inicia una transacción
+            # Inicia una transacción
             connection.begin()
 
             # Inserta los datos en la tabla 'login' para obtener el valor autoincremental de 'id_login'
             cursor = connection.cursor()
             cursor.execute("INSERT INTO login (correo, contrasena, id_rol) VALUES (:correo, :contrasena, :id_rol)",
                            {'correo': correo, 'contrasena': contrasena, 'id_rol': 2})
-            
+
             # Obtiene el valor de 'id_login' generado
-            cursor.execute("SELECT id_login FROM login WHERE correo = :correo", {'correo': correo})
+            cursor.execute("SELECT id_login FROM login WHERE correo = :correo", {
+                           'correo': correo})
             row = cursor.fetchone()
             new_id_login = row[0]
 
@@ -1183,6 +1232,7 @@ def registerUser():
     # Devuelve la plantilla de registro con los valores de los campos y el mensaje
     return render_template('register.html', nombre_cliente=nombre_cliente, direccion=direccion, nit=nit, correo=correo, message=message, message_type=message_type)
 
+
 @app.route('/buscar_productos', methods=['POST'])
 def buscar_productos():
     campo_busqueda = request.form.get('campo_busqueda')
@@ -1216,12 +1266,14 @@ def buscar_productos():
     # Renderizar la página de resultados de búsqueda con los productos encontrados
     return render_template('resultadosBusquedaProducto.html', productos=productos_encontrados)
 
+
 @app.route('/agregar/<int:producto_id>')
 def agregar_producto(producto_id):
     if 'carrito' not in session:
         session['carrito'] = []
     session['carrito'].append(producto_id)
     return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
