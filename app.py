@@ -30,17 +30,18 @@ def login():
             contrasena = request.form['contrasena']
 
             cursor = connection.cursor()
-            cursor.execute("SELECT id_login, id_rol FROM login WHERE correo = :correo AND contrasena = :contrasena",
-                           {'correo': correo, 'contrasena': contrasena})
+            cursor.execute("SELECT id_rol FROM login WHERE correo = :correo AND contrasena = :contrasena", {'correo': correo, 'contrasena': contrasena})
             user = cursor.fetchone() 
+            
             if user:
-                id_rol_u = user  
-                if id_rol_u == 2:
-                    session['id_rol'] = id_rol_u
-                    return redirect(url_for('buy'))
-                else:
+                id_rol_u = user[0]
+                print("id_rol:", id_rol_u)
+                if id_rol_u == 1:
                     session['id_rol'] = id_rol_u
                     return redirect(url_for('dashboard'))
+                else:
+                    session['id_rol'] = id_rol_u
+                    return redirect(url_for('buy'))
             else:
                 cursor.execute("SELECT id_rol FROM usuarios WHERE correo = :correo AND contrasena = :contrasena", {'correo': correo, 'contrasena': contrasena})
                 user_rol = cursor.fetchone()
