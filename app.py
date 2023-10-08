@@ -1314,5 +1314,44 @@ def receipts():
 
     return render_template('receipts.html', recibos=brandas_to_display, pagination=pagination, clientes=clientes)
 
+@app.route('/generar_recibo/<int:recibo_id>')
+def generar_recibo(recibo_id):
+    # Datos de ejemplo para el recibo (puedes reemplazar esto con datos de tu base de datos)
+    nombre_cliente = "John Doe"
+    total_a_pagar = 100.0
+
+    # Crear el PDF del recibo usando ReportLab
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer)
+
+    # Configurar el tamaño de la página
+    width, height = 400, 200
+    p.setPageSize((width, height))
+
+    # Agregar encabezado
+    p.setFont("Helvetica", 12)
+    p.drawString(10, height - 20, "Recibo de Pago")
+
+    # Agregar información del negocio
+    p.setFont("Helvetica", 10)
+    p.drawString(10, height - 40, "Nombre del Negocio")
+    p.drawString(10, height - 60, "Dirección del Negocio")
+    p.drawString(10, height - 80, "Teléfono del Negocio")
+
+    # Agregar línea separadora
+    p.line(10, height - 90, width - 10, height - 90)
+
+    # Agregar detalles del recibo
+    p.drawString(10, height - 110, f"Cliente: {nombre_cliente}")
+    p.drawString(10, height - 130, f"Total a Pagar: ${total_a_pagar:.2f}")
+
+    # Guardar el PDF
+    p.showPage()
+    p.save()
+
+    # Preparar el PDF para ser descargado
+    buffer.seek(0)
+    return Response(buffer, as_attachment=True, download_name=f"recibo_{recibo_id}.pdf")
+
 if __name__ == '__main__':
     app.run(debug=True)
