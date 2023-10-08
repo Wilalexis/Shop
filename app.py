@@ -64,7 +64,7 @@ def login():
 def logout():
     # Elimina la información de la sesión del usuario
     # Elimina la clave 'id_login' de la sesión si existe
-    session.pop('id_login', None)
+    session.clear()
 
     # Redirige al usuario a la página de inicio de sesión
     return redirect(url_for('login'))
@@ -145,23 +145,42 @@ def buy():
         return redirect(url_for('login'))
 
 
-@app.route('/carrito')
-def ver_carrito():
-    carrito = []
-    if 'carrito' in session:
-        for producto_id in session['carrito']:
-            cursor = connection.cursor()
-            cursor.execute(
-                "SELECT * FROM productos WHERE id = :id", {'id': producto_id})
-            producto = cursor.fetchone()
-            carrito.append(producto)
-    return render_template('carrito.html', carrito=carrito)
+@app.route('/agregar_al_carrito/<int:ID_PRODUCTO>')
+def agregar_al_carrito(ID_PRODUCTO):
+    if 'carrito' not in session:
+        session['carrito'] = []
+    session['carrito'].append(ID_PRODUCTO)
+    flash('Producto agregado', 'success')
+    return redirect(url_for('carrito'))
 
+
+@app.route('/carrito')
+def carrito():
+    carrito = []
+    total_carrito = 0
+    if 'carrito' in session:
+        for ID_PRODUCTO in session['carrito']:
+            cursor = connection.cursor()
+            cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA WHERE id_producto = :id", {'id': ID_PRODUCTO})
+            producto = cursor.fetchone()
+            carrito.append(producto)     
+
+            total_carrito += producto[6]
+    return render_template('shoppingcart.html', carrito=carrito, total_carrito=total_carrito)
 
 @app.route('/limpiar_carrito')
 def limpiar_carrito():
     session.pop('carrito', None)
-    return redirect(url_for('index'))
+    return redirect(url_for('buy'))
+
+@app.route('/quitar/<int:ID_PRODUCTO>')
+def quitar(ID_PRODUCTO):
+    if 'carrito' in session and ID_PRODUCTO in session['carrito']:
+        session['carrito'].remove(ID_PRODUCTO)
+        flash('Producto eliminado del carrito', 'success')
+    else:
+        flash('Producto no encontrado en el carrito', 'danger')
+    return redirect(url_for('carrito'))
 
 
 @app.route('/admin/category')  # ruta para la pagina categorias
@@ -193,8 +212,6 @@ def category():
     return render_template('category.html', categorias=category_to_display, pagination=pagination)
 
 # Ruta para insertar a Oracle los datos de categoría
-
-
 @app.route('/crear_categoria', methods=['POST'])
 def crear_categoria():
     nombre_categoria = request.form.get('nombre_categoria')
@@ -211,7 +228,6 @@ def crear_categoria():
     session['mensaje'] = 'Categoría agregada correctamente'
 
     return redirect(url_for('category'))
-
 
 # ruta para editar categoria
 @app.route('/editCategories/<int:ID_CATEGORIA>', methods=['GET', 'POST'])
@@ -289,7 +305,6 @@ def editCategories(ID_CATEGORIA):
             flash('Error al actualizar la categoria', 'danger')
             # Redirige a la página de usuarios
             return redirect(url_for('category'))
-
 
 # ruta para eliminar categoria
 @app.route('/eliminar_categoria/<int:ID_CATEGORIA>', methods=['POST', 'DELETE'])
@@ -1267,14 +1282,37 @@ def buscar_productos():
     # Renderizar la página de resultados de búsqueda con los productos encontrados
     return render_template('resultadosBusquedaProducto.html', productos=productos_encontrados)
 
+@app.route('/admin/receipts')
+def receipts():
+    cursor = connection.cursor()
+    cursor.execute("select r.no_recibo, r.fecha_emision, c.nombre_cliente from recibos r join clientes c on r.id_cliente = c.id_cliente")
+    recibos = cursor.fetchall()
+    cursor.close()
 
-@app.route('/agregar/<int:producto_id>')
-def agregar_producto(producto_id):
-    if 'carrito' not in session:
-        session['carrito'] = []
-    session['carrito'].append(producto_id)
-    return redirect(url_for('index'))
+    cursor1 = connection.cursor()
+    cursor1.execute("SELECT id_cliente, nombre_cliente FROM clientes")
+    clientes = cursor1.fetchall()
+    cursor1.close()
 
+    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+    page = request.args.get('page', type=int, default=1)
+    per_page = request.args.get('per_page', type=int, default=5)
+
+    # Supongamos que tienes una lista de usuarios llamada 'marcas'
+    total_recibos = len(recibos)
+
+    # Calcula el índice de inicio y final para la página actual
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    # obtiene las marcas actuales
+    brandas_to_display = recibos[start:end]
+
+    # Crea un objeto de paginación
+    pagination = Pagination(page=page, per_page=per_page, total=total_recibos,
+                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} recibos')
+
+    return render_template('receipts.html', recibos=brandas_to_display, pagination=pagination, clientes=clientes)
 
 if __name__ == '__main__':
     app.run(debug=True)

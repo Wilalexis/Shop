@@ -3,36 +3,54 @@
 {% block content %}
 
 <h1>Carrito de Compras</h1>
-
-{% if carrito %}
-<table>
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Acción</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for producto in carrito %}
-        <tr>
-            <td>{{ producto[1] }}</td>
-            <!-- Supongo que el nombre del producto está en la segunda columna de tu tabla Oracle -->
-            <td>${{ producto[2] }}</td> <!-- Supongo que el precio del producto está en la tercera columna -->
-            <td><a href="/quitar/{{ producto[0] }}">Quitar</a></td>
-            <!-- Supongo que el ID del producto está en la primera columna -->
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<p>Total: ${{ total_carrito }}</p>
-
-<a href="/limpiar_carrito">Vaciar carrito</a>
-<a href="/">Seguir comprando</a>
-<a href="/realizar_pedido">Realizar pedido</a>
-{% else %}
-<p>El carrito de compras está vacío.</p>
-<a href="/">Ir a la tienda</a>
-{% endif %}
+<div class="container">
+    {% if carrito %}
+        <table class="table table-bordered productos-table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Imagen</th>
+                    <th>Producto</th>
+                    <th>Descripción</th>
+                    <th>Talla</th>
+                    <th>Categoria</th>
+                    <th>Marca</th>
+                    <th>Precio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in carrito %}
+                <tr>
+                    <td><img src="{{ url_for('static', filename=producto[8]) }}" alt="Imagen" width="100" height="100"></td>
+                    <td>{{ producto[1] }}</td>
+                    <td>{{ producto[2] }}</td>
+                    <td>{{ producto[3] }}</td>
+                    <td>{{ producto[4] }}</td>
+                    <td>{{ producto[5] }}</td>
+                    <td>Q. {{ producto[6] }}</td>
+                    <td>
+                        <div class="button-container text-center">
+                            <form action="{{ url_for('quitar', ID_PRODUCTO=producto[0]) }}">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <img src="{{ url_for('static', filename='img/basura.png') }}" alt="Eliminar"
+                                    width="25" height="25">
+                            </button>
+                        </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="tag-precio">Total: Q{{ total_carrito }}</p>
+        
+        <a href="/limpiar_carrito" class="btn-limpiar">Vaciar carrito</a>
+        <a href="/buy" class="btn-compra">Seguir comprando</a>
+        <a href="/realizar_pedido" class="btn-pedir">Realizar pedido</a>
+        {% else %}
+        <p>El carrito de compras está vacío.</p>
+        <a href="/buy" class="btn-regresar">Ir a la tienda</a>
+        {% endif %}
+</div>
 
 {% endblock %}

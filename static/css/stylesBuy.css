@@ -21,7 +21,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
+    flex-flow: column nowrap;
     text-align: center;
     font-family: Arial;
 }
@@ -36,7 +36,6 @@
 .card .card-text {
     width: 99%;
     height: 50px;
-    margin: 1px;
     font-size: 100%;
     user-select: none;
     display: flex;
@@ -66,7 +65,7 @@
     cursor: pointer;
 }
 
-.card form {
+.card .shop-form {
     width: 100%;
     height: auto;
     display: flex;
@@ -74,7 +73,7 @@
     align-items: center;
 }
 
-.card input {
+.card input[type="number"] {
     width: 50%;
     height: 25px;
     margin: 4px;
@@ -83,7 +82,7 @@
 }
 
 .card .btn-agregar {
-    width: 100%;
+    width: 50%;
     height: 25px;
     color: white;
     background-color: rgb(18, 214, 18);

@@ -1,4 +1,93 @@
-/*Estilos de la tabla dashboard*/
+/* styles.css */
+*{
+    user-select: none;
+}
+.container {
+    margin-top: 20px;
+}
+
+.btn {
+    margin-right: 10px;
+}
+
+.productos-table th,
+.productos-table td {
+    text-align: center; /* Centrar el texto en celdas */
+}
+
+.productos-table{
+    background-color: white;
+}
+
+/* .productos-table tbody tr:hover {
+    background-color: #F5FEFE;
+    cursor: pointer;
+} */
+
+.productos-table td {
+    word-break: break-word;
+    max-width: 100px; /* Ajusta según tus necesidades */
+    white-space: nowrap; /* Evita el salto de línea en las celdas */
+    overflow: hidden; /* Evita que el contenido sobresalga */
+    text-overflow: ellipsis; /* Agrega puntos suspensivos si el contenido es muy largo */
+}
+a.btn:hover {
+    transform: scale(1.05);
+}
+
+/* Estilo para las imágenes dentro de los botones en el dashboard */
+.btn-dashboard img {
+    width: 80px;
+    height: 80px;
+}
+
+.container a {
+    width: auto;
+    height: 50px;
+    font-weight: bold;
+    color: black;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.container .btn-limpiar {
+    background-color: yellow;
+}
+
+.container .btn-compra {
+    background-color: greenyellow;
+}
+
+.container .btn-pedir {
+    background-color: aquamarine;
+}
+
+.container .btn-regresar {
+    background-color: lightblue;
+}
+
+.container p{
+    font-weight: bold;
+    min-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-self: center;
+}
+
+.container .tag-precio {
+    font-weight: bold;
+    min-width: 100%;
+    display: flex;
+    justify-content: right;
+    align-self: center;
+}
+
+.container a:hover {
+    text-decoration: none;
+    color: black;
+    opacity: 80%;
+}
+
 .styled-table {
     width: 100%;
     border-collapse: collapse;
@@ -12,7 +101,6 @@
     text-align: center;
 }
 
-  /* Estilo para los botones dentro de la tabla */
 .styled-table a.btn {
     display: inline-block;
     padding: 10px 20px;
@@ -20,17 +108,16 @@
     color: #fff;
     text-decoration: none;
     transition: transform 0.2s ease-in-out;
-    width: 350px; /* Establece el ancho deseado */
-    height: 100px; /* Establece la altura deseada */
-    font-size: 20px; /* Ajusta el tamaño de fuente si es necesario */
+    width: 350px; 
+    height: 100px;
+    font-size: 20px; 
 }
 
 .styled-table a.btn:hover {
     transform: scale(1.05);
 }
 
-/* Estilo para las imágenes dentro de los botones en el dashboard */
 .btn-dashboard img {
-    width: 80px; /* Establece el ancho deseado para las imágenes */
-    height: 80px; /* Establece la altura deseada para las imágenes */
+    width: 80px; 
+    height: 80px; 
 }

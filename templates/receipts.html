@@ -1,0 +1,75 @@
+{% extends 'baseDashboard.html' %}
+
+{% block content %}
+
+<div class="container">
+    <h2> <br> Gestión de Riecibos</h2>  
+    <br><br>
+    <div class="table-responsive">
+        
+        {% if 'mensaje' in session %}
+        <div id="mensaje-exito" class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session.pop('mensaje') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endif %}
+        
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-{{ messages[0] }}" role="alert">
+            {{ messages[1] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Formulario de búsqueda -->
+        <form action="{{ url_for('buscar_usuarios') }}" method="POST" class="form-inline">
+            <div class="form-group">
+                <label for="campo_busqueda">Selecciona el campo de búsqueda:</label>
+                <select class="form-control custom-select mx-2" id="campo_busqueda" name="campo_busqueda">
+                    <option value="noRecibo">Número de recibo</option>
+                    <option value="nombreCliente"> Nombre cliente</option>                    
+                </select>
+            
+                <label for="valor_busqueda" class="mx-2">Valor de Búsqueda:</label>
+                <input type="text" class="form-control mx-2" id="valor_busqueda" name="valor_busqueda" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-outline-primary btn-sm d-inline ml-2">Buscar</button>
+            </div>
+        </form><br>
+        
+        <!-- Tabla -->
+        <table class="table table-bordered usuarios-table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Número de recibo</th>
+                    <th>Fecha</th>
+                    <th>Clientes</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="">
+                {% for recibo in recibos %}
+                <tr>
+                    <td>{{ recibo[0] }}</td>
+                    <td>{{ recibo[1] }}</td>
+                    <td>{{ recibo[2] }}</td>              
+                    <td>{{ recibo[3] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Mostrar los botones de paginación -->
+<div class="pagination">
+    {{ pagination.info }}
+    {{ pagination.links }}
+</div>
+
+{% endblock %}

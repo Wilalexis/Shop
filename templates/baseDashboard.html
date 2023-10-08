@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesDashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesUsers.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesCategory.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesBuy.css') }}?v={{ timestamp }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesMarc.css') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css">
@@ -33,7 +34,7 @@
         <a href="{{ url_for('category') }}"><i class="fas fa-folder"></i> Categorías</a>
         <a href="{{ url_for('client') }}"><i class="fas fa-users"></i> Clientes</a>
         <a href="{{ url_for('marc') }}"><i class="fas fa-tags"></i> Marcas</a>
-        <a href="#"><i class="fas fa-receipt"></i> Recibos</a>
+        <a href="{{ url_for('receipts') }}"><i class="fas fa-receipt"></i> Recibos</a>
         <a href="{{ url_for('sizes') }}"><i class="fas fa-tshirt"></i> Tallas</a>
         <a href="#"><i class="fas fa-file-alt"></i> Generar reporte</a>
         <a href="#"><i class="fas fa-cog"></i> Configuración</a>
