@@ -1,3 +1,15 @@
+body{
+    overflow: hidden;
+}
+.index-container {
+    width: auto;
+    height: 100%;
+    font-weight: bold;
+    color: black;
+    border-radius: 10px;
+    padding: 10px;
+}
+
 .image-button {
     display: flex;
     flex-direction: column;
@@ -37,9 +49,3 @@
     text-decoration: none; /* Quita la línea de decoración */
 }
 /* tabala */
-.index-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #D8F0DC; /* Color de fondo de la tabla */
-    border-radius: 5px;
-}
