@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, session, flash, redirect, url_for
+from flask import Flask, render_template, request, session, flash, redirect, url_for, Response
 from flask_wtf import FlaskForm
 from wtforms import HiddenField
 from flask_paginate import Pagination, get_page_args
 from flask_bootstrap import Bootstrap
+from reportlab.pdfgen import canvas
+import io
 import cx_Oracle
 import os
 import time
@@ -1011,8 +1013,6 @@ def products():
     return render_template('products.html', productos=products_to_display, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, pagination=pagination)
 
 # Ruta para insertar a Oracle los datos del producto
-
-
 @app.route('/crear_producto', methods=['POST'])
 def crear_producto():
     nombre_producto = request.form.get('nombre_producto')
@@ -1351,7 +1351,12 @@ def generar_recibo(recibo_id):
 
     # Preparar el PDF para ser descargado
     buffer.seek(0)
-    return Response(buffer, as_attachment=True, download_name=f"recibo_{recibo_id}.pdf")
+    response = Response(buffer)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=recibo_{recibo_id}.pdf'
+
+    return response
+
 
 if __name__ == '__main__':
     app.run(debug=True)
