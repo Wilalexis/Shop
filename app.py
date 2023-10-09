@@ -1314,11 +1314,21 @@ def receipts():
 
     return render_template('receipts.html', recibos=brandas_to_display, pagination=pagination, clientes=clientes)
 
-@app.route('/generar_recibo/<int:recibo_id>')
-def generar_recibo(recibo_id):
+@app.route('/generar_recibo')
+def generar_recibo():
+    cliente_id =1
     # Datos de ejemplo para el recibo (puedes reemplazar esto con datos de tu base de datos)
-    nombre_cliente = "John Doe"
-    total_a_pagar = 100.0
+    cursor = connection.cursor()
+    cursor.execute("SELECT nombre_cliente, direccion, nit FROM clientes WHERE id_cliente = :cliente_id", cliente_id=cliente_id)
+    cliente_data = cursor.fetchone()
+    cursor.close()
+    if cliente_data:
+        nombre_cliente, direccion_cliente, nit = cliente_data
+    else:
+        # Manejar el caso en el que no se encuentre el cliente
+        nombre_cliente = "Cliente no encontrado"
+        direccion_cliente = ""
+        nit = ""
 
     # Crear el PDF del recibo usando ReportLab
     buffer = io.BytesIO()
@@ -1332,18 +1342,23 @@ def generar_recibo(recibo_id):
     p.setFont("Helvetica", 12)
     p.drawString(10, height - 20, "Recibo de Pago")
 
+    # Agregar una imagen al recibo (asegúrate de ajustar la ruta de la imagen)
+    imagen_path = 'static/img/logo_recibo.jpg'
+    p.drawImage(imagen_path, 350, 150, 50, 50)
     # Agregar información del negocio
     p.setFont("Helvetica", 10)
-    p.drawString(10, height - 40, "Nombre del Negocio")
-    p.drawString(10, height - 60, "Dirección del Negocio")
-    p.drawString(10, height - 80, "Teléfono del Negocio")
+    p.drawString(10, height - 40, "Nombre del Negocio: Di Socks GT")
+    p.drawString(10, height - 60, "Dirección del Negocio: Chimaltenango")
+    # p.drawString(10, height - 80, "nit del Negocio")
 
     # Agregar línea separadora
     p.line(10, height - 90, width - 10, height - 90)
 
     # Agregar detalles del recibo
-    p.drawString(10, height - 110, f"Cliente: {nombre_cliente}")
-    p.drawString(10, height - 130, f"Total a Pagar: ${total_a_pagar:.2f}")
+    p.drawString(10, height - 150, f"Cliente: {nombre_cliente}")
+    p.drawString(10, height - 170, f"Dirección: {direccion_cliente}")
+    p.drawString(10, height - 190, f"nit: {nit}")
+
 
     # Guardar el PDF
     p.showPage()
@@ -1353,7 +1368,7 @@ def generar_recibo(recibo_id):
     buffer.seek(0)
     response = Response(buffer)
     response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f'attachment; filename=recibo_{recibo_id}.pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=recibo.pdf'
 
     return response
 
