@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-cliente">
+    <form method="POST" action="{{url_for('generar_recibo')}}">
+        <h2>Ingrese sus datos para el envío</h2><br>
+        <div class="form-group1">
+            <label for="nombre_cliente">Nombre:</label>
+            <input type="text" id="nombre_cliente" name="nombre_cliente" required value="{{ session.get('nombre_cliente', '') }}">
+        </div>
+        <div class="form-group1">
+            <label for="direccion">Dirección:</label>
+            <input type="text" id="direccion" name="direccion" required value="{{ session.get('direccion', '') }}">
+        </div>
+        <div class="form-group1">
+            <label for="nit">NIT:</label>
+            <input type="text" id="nit" name="nit" required value="{{ session.get('nit', '') }}">
+        </div>
+        <div class="form-group1">
+            <label for="correo">Correo Electrónico:</label>
+            <input type="email" id="correo" name="correo" required value="{{ session.get('correo', '') }}">
+        </div>
+        <div class="form-group1">
+            <label for="nombre_comprador">Direccion de envío exacto:</label>
+            <input type="text" id="direccion_envio" name="direccion_envio" required>
+        </div>
+        <button type="submit" class="btn btn-primary btnComprador">Enviar</button>
+    </form>
+</div>
+{% endblock %}
