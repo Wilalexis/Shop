@@ -28,36 +28,44 @@ class DeleteForm(FlaskForm):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-            correo = request.form['correo']
-            contrasena = request.form['contrasena']
+        correo = request.form['correo']
+        contrasena = request.form['contrasena']
 
-            cursor = connection.cursor()
-            cursor.execute("SELECT id_rol FROM login WHERE correo = :correo AND contrasena = :contrasena", {'correo': correo, 'contrasena': contrasena})
-            user = cursor.fetchone() 
-            
-            if user:
-                id_rol_u = user[0]
-                print("id_rol:", id_rol_u)
-                if id_rol_u == 1:
-                    session['id_rol'] = id_rol_u
+        cursor = connection.cursor()
+        cursor.execute("SELECT id_rol FROM login WHERE correo = :correo AND contrasena = :contrasena", {'correo': correo, 'contrasena': contrasena})
+        user = cursor.fetchone() 
+
+        if user:
+            id_rol_u = user[0]
+            session['id_rol'] = id_rol_u
+
+            # Ahora, recupera y guarda las variables de sesión
+            cursor.execute("SELECT nombre_cliente, direccion, nit, correo FROM clientes WHERE correo = :correo", {'correo': correo})
+            cliente_info = cursor.fetchone()
+
+            if cliente_info:
+                nombre_cliente, direccion, nit, correo = cliente_info
+                session['nombre_cliente'] = nombre_cliente
+                session['direccion'] = direccion
+                session['nit'] = nit
+                session['correo'] = correo
+
+            if id_rol_u == 1:
+                return redirect(url_for('dashboard'))
+            else:
+                return redirect(url_for('buy'))
+        else:
+            cursor.execute("SELECT id_rol FROM usuarios WHERE correo = :correo AND contrasena = :contrasena", {'correo': correo, 'contrasena': contrasena})
+            user_rol = cursor.fetchone()
+
+            if user_rol:
+                id_rol = user_rol[0]
+                session['id_rol'] = id_rol
+
+                if id_rol == 1:
                     return redirect(url_for('dashboard'))
                 else:
-                    session['id_rol'] = id_rol_u
                     return redirect(url_for('buy'))
-            else:
-                cursor.execute("SELECT id_rol FROM usuarios WHERE correo = :correo AND contrasena = :contrasena", {'correo': correo, 'contrasena': contrasena})
-                user_rol = cursor.fetchone()
-    
-                if user_rol:
-                    id_rol = user_rol[0]
-                    print("id_rol:", id_rol)
-    
-                    if id_rol == 1:
-                        session['id_rol'] = id_rol
-                        return redirect(url_for('dashboard'))
-                    else:
-                        session['id_rol'] = id_rol
-                        return redirect(url_for('buy'))
 
     return render_template('login.html')
 
@@ -71,6 +79,9 @@ def logout():
     # Redirige al usuario a la página de inicio de sesión
     return redirect(url_for('login'))
 
+@app.route('/ingresar_datos_comprador', methods=['GET', 'POST'])
+def ingresar_datos_comprador():
+    return render_template('formulario_datos_comprador.html')
 
 @app.route('/')  # Ruta para index.html
 def index():
@@ -1314,21 +1325,13 @@ def receipts():
 
     return render_template('receipts.html', recibos=brandas_to_display, pagination=pagination, clientes=clientes)
 
-@app.route('/generar_recibo')
+@app.route('/generar_recibo', methods=['GET','POST'])
 def generar_recibo():
-    cliente_id =1
     # Datos de ejemplo para el recibo (puedes reemplazar esto con datos de tu base de datos)
-    cursor = connection.cursor()
-    cursor.execute("SELECT nombre_cliente, direccion, nit FROM clientes WHERE id_cliente = :cliente_id", cliente_id=cliente_id)
-    cliente_data = cursor.fetchone()
-    cursor.close()
-    if cliente_data:
-        nombre_cliente, direccion_cliente, nit = cliente_data
-    else:
-        # Manejar el caso en el que no se encuentre el cliente
-        nombre_cliente = "Cliente no encontrado"
-        direccion_cliente = ""
-        nit = ""
+    correo = request.form.get('correo')
+    nombre_cliente = request.form.get('nombre_cliente')
+    direccion = request.form.get('direccion')
+    nit = request.form.get('nit')
 
     # Crear el PDF del recibo usando ReportLab
     buffer = io.BytesIO()
@@ -1349,15 +1352,16 @@ def generar_recibo():
     p.setFont("Helvetica", 10)
     p.drawString(10, height - 40, "Nombre del Negocio: Di Socks GT")
     p.drawString(10, height - 60, "Dirección del Negocio: Chimaltenango")
-    # p.drawString(10, height - 80, "nit del Negocio")
+    p.drawString(10, height - 80, f"Correo: {correo}")
 
     # Agregar línea separadora
     p.line(10, height - 90, width - 10, height - 90)
 
     # Agregar detalles del recibo
     p.drawString(10, height - 150, f"Cliente: {nombre_cliente}")
-    p.drawString(10, height - 170, f"Dirección: {direccion_cliente}")
-    p.drawString(10, height - 190, f"nit: {nit}")
+    p.drawString(10, height - 170, f"Dirección: {direccion}")
+    p.drawString(10, height - 190, f"Nit: {nit}")
+
 
 
     # Guardar el PDF
