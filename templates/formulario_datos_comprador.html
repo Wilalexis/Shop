@@ -4,6 +4,7 @@
 <div class="container-cliente">
     <form method="POST" action="{{url_for('generar_recibo')}}">
         <h2>Ingrese sus datos para el envío</h2><br>
+        <input type="hidden" value="{{ session.get('id_cliente', '') }}" name="id_cliente" id="id_cliente">
         <div class="form-group1">
             <label for="nombre_cliente">Nombre:</label>
             <input type="text" id="nombre_cliente" name="nombre_cliente" required value="{{ session.get('nombre_cliente', '') }}">
@@ -22,7 +23,7 @@
         </div>
         <div class="form-group1">
             <label for="nombre_comprador">Direccion de envío exacto:</label>
-            <input type="text" id="direccion_envio" name="direccion_envio" required>
+            <input type="text" id="direccion_envio" name="direccion_envio" autocomplete="off" required>
         </div>
         <button type="submit" class="btn btn-primary btnComprador">Enviar</button>
     </form>

@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask, render_template, request, session, flash, redirect, url_for, Response
 from flask_wtf import FlaskForm
 from wtforms import HiddenField
@@ -40,11 +41,12 @@ def login():
             session['id_rol'] = id_rol_u
 
             # Ahora, recupera y guarda las variables de sesión
-            cursor.execute("SELECT nombre_cliente, direccion, nit, correo FROM clientes WHERE correo = :correo", {'correo': correo})
+            cursor.execute("SELECT id_cliente, nombre_cliente, direccion, nit, correo FROM clientes WHERE correo = :correo", {'correo': correo})
             cliente_info = cursor.fetchone()
 
             if cliente_info:
-                nombre_cliente, direccion, nit, correo = cliente_info
+                id_cliente,nombre_cliente, direccion, nit, correo = cliente_info
+                session['id_cliente'] = id_cliente
                 session['nombre_cliente'] = nombre_cliente
                 session['direccion'] = direccion
                 session['nit'] = nit
@@ -116,7 +118,6 @@ def dashboard():
 def shoppingcart():
     return render_template('shoppingcart.html')
 
-
 @app.route('/buy')
 def buy():
     # Verifica si el usuario tiene una sesión válida y el rol correcto
@@ -157,28 +158,36 @@ def buy():
     else:
         return redirect(url_for('login'))
 
-
-@app.route('/agregar_al_carrito/<int:ID_PRODUCTO>')
+@app.route('/agregar_al_carrito/<int:ID_PRODUCTO>', methods=['POST'])
 def agregar_al_carrito(ID_PRODUCTO):
     if 'carrito' not in session:
         session['carrito'] = []
-    session['carrito'].append(ID_PRODUCTO)
-    flash('Producto agregado', 'success')
-    return redirect(url_for('carrito'))
 
+    cantidad = int(request.form.get('cantidad', 1))
+
+    # Busca si el producto ya está en el carrito
+    for item in session['carrito']:
+        if item[0] == ID_PRODUCTO:
+            item[1] += cantidad
+            break
+    else:
+        session['carrito'].append([ID_PRODUCTO, cantidad])
+
+    flash('Producto(s) agregado(s)', 'success')
+    return redirect(url_for('carrito'))
 
 @app.route('/carrito')
 def carrito():
     carrito = []
     total_carrito = 0
     if 'carrito' in session:
-        for ID_PRODUCTO in session['carrito']:
+        for ID_PRODUCTO, cantidad in session['carrito']:
             cursor = connection.cursor()
             cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA WHERE id_producto = :id", {'id': ID_PRODUCTO})
             producto = cursor.fetchone()
-            carrito.append(producto)     
+            carrito.append((producto, cantidad))     
 
-            total_carrito += producto[6]
+            total_carrito += producto[6] * cantidad
     return render_template('shoppingcart.html', carrito=carrito, total_carrito=total_carrito)
 
 @app.route('/limpiar_carrito')
@@ -188,13 +197,16 @@ def limpiar_carrito():
 
 @app.route('/quitar/<int:ID_PRODUCTO>')
 def quitar(ID_PRODUCTO):
-    if 'carrito' in session and ID_PRODUCTO in session['carrito']:
-        session['carrito'].remove(ID_PRODUCTO)
-        flash('Producto eliminado del carrito', 'success')
-    else:
-        flash('Producto no encontrado en el carrito', 'danger')
-    return redirect(url_for('carrito'))
+    if 'carrito' in session:
+        for item in session['carrito']:
+            if item[0] == ID_PRODUCTO:
+                session['carrito'].remove(item)
+                flash('Producto eliminado del carrito', 'success')
+                break
+        else:
+            flash('Producto no encontrado en el carrito', 'danger')
 
+    return redirect(url_for('carrito'))
 
 @app.route('/admin/category')  # ruta para la pagina categorias
 def category():
@@ -529,8 +541,6 @@ def marc():
     return render_template('marc.html', marcas=brandas_to_display, pagination=pagination)
 
 # Ruta para insertar a Oracle los datos de marcas
-
-
 @app.route('/crear_marca', methods=['POST'])
 def crear_marca():
     nombre_marca = request.form.get('nombre_marca')
@@ -674,8 +684,6 @@ def sizes():
     return render_template('sizes.html', tallas=sizes_to_display, pagination=pagination)
 
 # Ruta para insertar a Oracle los datos de tallas
-
-
 @app.route('/crear_talla', methods=['POST'])
 def crear_talla():
     nombre_talla = request.form.get('nombre_talla')
@@ -826,8 +834,6 @@ def users():
     return render_template('users.html', usuarios=users_to_display, pagination=pagination, roles=roles)
 
 # Ruta para insertar a Oracle los datos de usuario
-
-
 @app.route('/crear_usuario', methods=['POST'])
 def crear_usuario():
     nombre = request.form.get('nombre')
@@ -1325,44 +1331,132 @@ def receipts():
 
     return render_template('receipts.html', recibos=brandas_to_display, pagination=pagination, clientes=clientes)
 
-@app.route('/generar_recibo', methods=['GET','POST'])
+
+@app.route('/crear_recibo', methods=['POST'])
+def crear_recibo():
+    fecha_emision = datetime.now()
+    fecha_hoy = fecha_emision.strftime('%d-%m-%Y')
+    id_cliente = request.form.get('id_cliente')
+    nit = request.form.get('nit')
+    direccion = request.form.get('direccion')
+    nombre = request.form.get('nombre_cliente')
+
+    # Preparar la consulta SQL para insertar el recibo
+    sql_recibo = "INSERT INTO RECIBOS (FECHA_EMISION, ID_CLIENTE, NIT, DIRECCION, NOMBRE) VALUES (:fecha_emision, :id_cliente, :nit, :direccion, :nombre_cliente)"
+
+    # Ejecutar la consulta para insertar el recibo
+    cursor = connection.cursor()
+    cursor.execute(sql_recibo, {'fecha_emision': fecha_hoy, 'id_cliente': id_cliente, 'nit': nit, 'direccion': direccion, 'nombre_cliente': nombre})
+    connection.commit()
+
+    # Obtener el ID del recibo recién insertado
+    cursor.execute("SELECT RECIBOS_SEQ.CURRVAL FROM DUAL")
+    recibo_id = cursor.fetchone()[0]
+
+    # Insertar los detalles del carrito en la tabla DETALLES_RECIBO
+    if 'carrito' in session:
+        for producto_id, cantidad in session['carrito']:
+            cursor.execute("SELECT P.PRECIO FROM PRODUCTOS P WHERE P.ID_PRODUCTO = :producto_id", {'producto_id': producto_id})
+            precio_unitario = cursor.fetchone()[0]
+            
+            sql_detalles_recibo = "INSERT INTO DETALLES_RECIBO (NO_RECIBO, ID_PRODUCTO, CANTIDAD, P_UNITARIO) VALUES (:no_recibo, :id_producto, :cantidad, :precio_unitario)"
+            cursor.execute(sql_detalles_recibo, {'no_recibo': recibo_id, 'id_producto': producto_id, 'cantidad': cantidad, 'precio_unitario': precio_unitario})
+            connection.commit()
+
+    return redirect(url_for('generar_recibo'))
+
+def obtener_detalles_carrito():
+    if 'carrito' in session:
+        detalles = []
+        for producto_id, cantidad in session['carrito']:
+            cursor = connection.cursor()
+            cursor.execute("SELECT P.NOMBRE_PRODUCTO, P.PRECIO FROM PRODUCTOS P WHERE P.ID_PRODUCTO = :producto_id", {'producto_id': producto_id})
+            producto = cursor.fetchone()
+            if producto:
+                concepto = producto[0]
+                precio = producto[1]
+                total = precio * cantidad
+                detalles.append((cantidad, concepto, precio, total))
+        return detalles
+    return []
+
+
+@app.route('/generar_recibo', methods=['GET', 'POST'])
 def generar_recibo():
     # Datos de ejemplo para el recibo (puedes reemplazar esto con datos de tu base de datos)
-    correo = request.form.get('correo')
-    nombre_cliente = request.form.get('nombre_cliente')
-    direccion = request.form.get('direccion')
+    fecha = datetime.now()
+    fecha_hoy = fecha.strftime('%d-%m-%Y')
+    id_cliente = request.form.get('id_cliente')
     nit = request.form.get('nit')
+    direccion = request.form.get('direccion')
+    nombre = request.form.get('nombre_cliente')
+
+    # Preparar la consulta SQL para insertar el recibo
+    sql_recibo = "INSERT INTO RECIBOS (FECHA_EMISION, ID_CLIENTE, NIT, DIRECCION, NOMBRE) VALUES (:fecha_emision, :id_cliente, :nit, :direccion, :nombre_cliente)"
+
+    # Ejecutar la consulta para insertar el recibo
+    cursor = connection.cursor()
+    cursor.execute(sql_recibo, {'fecha_emision': fecha_hoy, 'id_cliente': id_cliente, 'nit': nit, 'direccion': direccion, 'nombre_cliente': nombre})
+    connection.commit()
+
+    # Obtener el ID del recibo recién insertado
+    cursor.execute("SELECT RECIBOS_SEQ.CURRVAL FROM DUAL")
+    recibo_id = cursor.fetchone()[0]
+
+    # Insertar los detalles del carrito en la tabla DETALLES_RECIBO
+    if 'carrito' in session:
+        for producto_id, cantidad in session['carrito']:
+            cursor.execute("SELECT P.PRECIO FROM PRODUCTOS P WHERE P.ID_PRODUCTO = :producto_id", {'producto_id': producto_id})
+            precio_unitario = cursor.fetchone()[0]
+            
+            sql_detalles_recibo = "INSERT INTO DETALLES_RECIBO (NO_RECIBO, ID_PRODUCTO, CANTIDAD, P_UNITARIO) VALUES (:no_recibo, :id_producto, :cantidad, :precio_unitario)"
+            cursor.execute(sql_detalles_recibo, {'no_recibo': recibo_id, 'id_producto': producto_id, 'cantidad': cantidad, 'precio_unitario': precio_unitario})
+            connection.commit()
+
+    # Obtener detalles de los productos en el carrito
+    detalles_carrito = obtener_detalles_carrito()  # Implementa esta función para obtener los detalles del carrito
 
     # Crear el PDF del recibo usando ReportLab
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer)
 
     # Configurar el tamaño de la página
-    width, height = 400, 200
+    width, height = 400, 400
     p.setPageSize((width, height))
 
     # Agregar encabezado
     p.setFont("Helvetica", 12)
-    p.drawString(10, height - 20, "Recibo de Pago")
+    p.drawString(10, height - 20, "Recibo de compra")
+    p.drawString(10, height - 40, "Di Socks GT")
 
-    # Agregar una imagen al recibo (asegúrate de ajustar la ruta de la imagen)
+    # Agregar una imagen al recibo (ajusta la ruta de la imagen)
     imagen_path = 'static/img/logo_recibo.jpg'
-    p.drawImage(imagen_path, 350, 150, 50, 50)
+    p.drawImage(imagen_path, 350, 350, 50, 50)
+
     # Agregar información del negocio
     p.setFont("Helvetica", 10)
-    p.drawString(10, height - 40, "Nombre del Negocio: Di Socks GT")
-    p.drawString(10, height - 60, "Dirección del Negocio: Chimaltenango")
-    p.drawString(10, height - 80, f"Correo: {correo}")
+    p.drawString(10, height - 80, f"Vendido a: {nombre}")
+    p.drawString(10, height - 90, f"Dirección: {direccion}")
+    p.drawString(250, height - 80, f"Fecha: {fecha_hoy}")
+    p.drawString(250, height - 90, f"No. de recibo: {recibo_id}")
 
     # Agregar línea separadora
-    p.line(10, height - 90, width - 10, height - 90)
+    p.line(10, height - 100, width - 10, height - 100)
 
-    # Agregar detalles del recibo
-    p.drawString(10, height - 150, f"Cliente: {nombre_cliente}")
-    p.drawString(10, height - 170, f"Dirección: {direccion}")
-    p.drawString(10, height - 190, f"Nit: {nit}")
+    p.drawString(10, height - 120, f"Cantidad")
+    p.drawString(120, height - 120, f"Concepto")
+    p.drawString(250, height - 120, f"Precio")
+    p.drawString(350, height - 120, f"Total")
 
-
+    # Agregar detalles del carrito al recibo
+    y_position = height - 140
+    for detalle in detalles_carrito:
+        cantidad, concepto, precio, total = detalle
+        p.drawString(10, y_position, str(cantidad))
+        p.drawString(120, y_position, concepto)
+        p.drawString(250, y_position, str(precio))
+        p.drawString(350, y_position, str(total))
+        y_position -= 10  # Ajusta la posición vertical
 
     # Guardar el PDF
     p.showPage()
@@ -1375,6 +1469,7 @@ def generar_recibo():
     response.headers['Content-Disposition'] = f'attachment; filename=recibo.pdf'
 
     return response
+
 
 
 if __name__ == '__main__':
