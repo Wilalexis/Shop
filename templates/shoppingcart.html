@@ -10,24 +10,24 @@
                 <tr>
                     <th>Imagen</th>
                     <th>Producto</th>
-                    <th>Descripción</th>
                     <th>Talla</th>
                     <th>Categoria</th>
                     <th>Marca</th>
                     <th>Precio</th>
+                    <th>Cantidad</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                {% for producto in carrito %}
+                {% for producto, cantidad in carrito %}
                 <tr>
                     <td><img src="{{ url_for('static', filename=producto[8]) }}" alt="Imagen" width="100" height="100"></td>
                     <td>{{ producto[1] }}</td>
-                    <td>{{ producto[2] }}</td>
                     <td>{{ producto[3] }}</td>
                     <td>{{ producto[4] }}</td>
                     <td>{{ producto[5] }}</td>
                     <td>Q. {{ producto[6] }}</td>
+                    <td><input type="number" id="cantidad" name="cantidad" value="{{ cantidad }}"></td>
                     <td>
                         <div class="button-container text-center">
                             <form action="{{ url_for('quitar', ID_PRODUCTO=producto[0]) }}">
