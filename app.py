@@ -349,7 +349,6 @@ def eliminar_categoria(ID_CATEGORIA):
 
     return redirect(url_for('category'))
 
-
 @app.route('/admin/client')
 def client():
     cursor = connection.cursor()
@@ -383,7 +382,6 @@ def client():
 
     return render_template('client.html', clientes=clients_to_display, pagination=pagination, login=login)
 
-
 @app.route('/crear_cliente', methods=['POST'])
 def crear_client():
     nombre = request.form.get('nombre')
@@ -407,7 +405,6 @@ def crear_client():
 
     return redirect(url_for('client'))
 
-
 @app.route('/eliminar_client/<int:ID_CLIENTE>', methods=['POST', 'DELETE'])
 def eliminar_client(ID_CLIENTE):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
@@ -424,7 +421,6 @@ def eliminar_client(ID_CLIENTE):
             cursor.close()
 
     return redirect(url_for('client'))
-
 
 @app.route('/editClient', methods=['POST'])
 def editClient(ID_CLIENTE):
@@ -512,7 +508,6 @@ def editClient(ID_CLIENTE):
             # Redirige a la página de usuarios
             return redirect(url_for('client'))
 
-
 @app.route('/admin/marc')
 def marc():
     cursor = connection.cursor()
@@ -557,7 +552,6 @@ def crear_marca():
     session['mensaje'] = 'Marca agregada correctamente'
 
     return redirect(url_for('marc'))
-
 
 # ruta para editar marcas
 @app.route('/editBrands/<int:ID_MARCA>', methods=['GET', 'POST'])
@@ -635,7 +629,6 @@ def editBrands(ID_MARCA):
             # Redirige a la página de usuarios
             return redirect(url_for('marc'))
 
-
 # ruta para eliminar marcas
 @app.route('/eliminar_marca/<int:ID_MARCA>', methods=['POST', 'DELETE'])
 def eliminar_marca(ID_MARCA):
@@ -653,7 +646,6 @@ def eliminar_marca(ID_MARCA):
             cursor.close()
 
     return redirect(url_for('marc'))
-
 
 @app.route('/admin/sizes')  # Ruta para la pagina de tallas
 def sizes():
@@ -700,7 +692,6 @@ def crear_talla():
     session['mensaje'] = 'talla agregada correctamente'
 
     return redirect(url_for('sizes'))
-
 
 # ruta para editar tallas
 @app.route('/editSizes/<int:ID_TALLA>', methods=['GET', 'POST'])
@@ -779,7 +770,6 @@ def editSizes(ID_TALLA):
             # Redirige a la página de tallas
             return redirect(url_for('sizes'))
 
-
 # ruta para eliminar Tallas
 @app.route('/eliminar_talla/<int:ID_TALLA>', methods=['POST', 'DELETE'])
 def eliminar_talla(ID_TALLA):
@@ -797,7 +787,6 @@ def eliminar_talla(ID_TALLA):
             cursor.close()
 
     return redirect(url_for('sizes'))
-
 
 @app.route('/admin/users')  # Ruta para la página de usuarios
 def users():
@@ -855,7 +844,6 @@ def crear_usuario():
 
     return redirect(url_for('users'))
 
-
 @app.route('/eliminar_usuario/<int:ID_USUARIO>', methods=['POST', 'DELETE'])
 def eliminar_usuario(ID_USUARIO):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
@@ -872,7 +860,6 @@ def eliminar_usuario(ID_USUARIO):
             cursor.close()
 
     return redirect(url_for('users'))
-
 
 @app.route('/buscar_usuarios', methods=['POST'])
 def buscar_usuarios():
@@ -900,7 +887,6 @@ def buscar_usuarios():
 
     # Renderizar la página de resultados de búsqueda con los usuarios encontrados
     return render_template('resultadosBusquedaUsuario.html', usuarios=usuarios_encontrados)
-
 
 @app.route('/editUsers/<int:ID_USUARIO>', methods=['GET', 'POST'])
 def editUsers(ID_USUARIO):
@@ -986,7 +972,6 @@ def editUsers(ID_USUARIO):
             # Redirige a la página de usuarios
             return redirect(url_for('users'))
 
-
 @app.route('/admin/products')  # Ruta para la página de productos
 def products():
     cursor = connection.cursor()
@@ -1063,7 +1048,6 @@ def crear_producto():
     session['mensaje'] = 'Producto agregado correctamente'
 
     return redirect(url_for('products'))
-
 
 @app.route('/editProducts/<int:ID_PRODUCTO>', methods=['GET', 'POST'])
 def editProducts(ID_PRODUCTO):
@@ -1182,7 +1166,6 @@ def editProducts(ID_PRODUCTO):
             # Redirige a la página de productos
             return redirect(url_for('products'))
 
-
 @app.route('/eliminar_producto/<int:ID_PRODUCTO>', methods=['POST', 'DELETE'])
 def eliminar_producto(ID_PRODUCTO):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
@@ -1199,7 +1182,6 @@ def eliminar_producto(ID_PRODUCTO):
             cursor.close()
 
     return redirect(url_for('products'))
-
 
 # Función para registrar un nuevo cliente
 @app.route('/registerUser', methods=['POST'])
@@ -1264,7 +1246,6 @@ def registerUser():
 
     # Devuelve la plantilla de registro con los valores de los campos y el mensaje
     return render_template('register.html', nombre_cliente=nombre_cliente, direccion=direccion, nit=nit, correo=correo, message=message, message_type=message_type)
-
 
 @app.route('/buscar_productos', methods=['POST'])
 def buscar_productos():
@@ -1331,7 +1312,6 @@ def receipts():
 
     return render_template('receipts.html', recibos=brandas_to_display, pagination=pagination, clientes=clientes)
 
-
 @app.route('/crear_recibo', methods=['POST'])
 def crear_recibo():
     fecha_emision = datetime.now()
@@ -1379,7 +1359,6 @@ def obtener_detalles_carrito():
                 detalles.append((cantidad, concepto, precio, total))
         return detalles
     return []
-
 
 @app.route('/generar_recibo', methods=['GET', 'POST'])
 def generar_recibo():
@@ -1450,14 +1429,17 @@ def generar_recibo():
 
     # Agregar detalles del carrito al recibo
     y_position = height - 140
+    total_compra = 0
     for detalle in detalles_carrito:
         cantidad, concepto, precio, total = detalle
         p.drawString(10, y_position, str(cantidad))
         p.drawString(120, y_position, concepto)
         p.drawString(250, y_position, str(precio))
         p.drawString(350, y_position, str(total))
+        total_compra += precio * cantidad
         y_position -= 10  # Ajusta la posición vertical
-
+    p.line(10, height - 325, width - 10, height - 325)
+    p.drawString(300, 50, "Total: "+str(total_compra))
     # Guardar el PDF
     p.showPage()
     p.save()
@@ -1469,8 +1451,6 @@ def generar_recibo():
     response.headers['Content-Disposition'] = f'attachment; filename=recibo.pdf'
 
     return response
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
