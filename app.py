@@ -1250,7 +1250,7 @@ def eliminar_producto(ID_PRODUCTO):
         # Lógica para eliminar el usuario de la base de datos Oracle
         try:
             cursor = connection.cursor()
-            cursor.execute("DELETE FROM PRODUCTOS WHERE ID_PRODUCTO = :ID_PRODCUTO", {
+            cursor.execute("DELETE FROM PRODUCTOS WHERE ID_PRODUCTO = :ID_PRODUCTO", {
                            'ID_PRODUCTO': ID_PRODUCTO})
             connection.commit()
             flash('PRODCUTO eliminado con éxito', 'success')
