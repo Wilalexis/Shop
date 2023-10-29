@@ -113,10 +113,42 @@ def dashboard():
     else:
         return redirect(url_for('login'))
 
-
 @app.route('/shoppingcart')  # Ruta para la página de carrito de compras
 def shoppingcart():
     return render_template('shoppingcart.html')
+
+@app.route('/buy_show')
+def buy_show():
+        # Obtén los productos
+        cursor = connection.cursor()
+        cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA ORDER BY P.ID_PRODUCTO DESC")
+        productos = cursor.fetchall()
+        cursor.close()
+
+        # Obtén las tallas
+        cursor1 = connection.cursor()
+        cursor1.execute("SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
+        tallasproductos = cursor1.fetchall()
+        cursor1.close()
+
+        # Obtén las categorías
+        cursor2 = connection.cursor()
+        cursor2.execute(
+            "SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
+        categoriasproductos = cursor2.fetchall()
+        cursor2.close()
+
+        # Obtén las marcas
+        cursor3 = connection.cursor()
+        cursor3.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
+        marcasproductos = cursor3.fetchall()
+        cursor3.close()
+
+        # Obtén el timestamp actual
+        timestamp = int(time.time())
+
+        # Devuelve la plantilla de compras con los datos obtenidos
+        return render_template('buy_show.html', productos=productos, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, timestamp=timestamp)
 
 @app.route('/buy')
 def buy():
@@ -160,22 +192,28 @@ def buy():
 
 @app.route('/agregar_al_carrito/<int:ID_PRODUCTO>', methods=['POST'])
 def agregar_al_carrito(ID_PRODUCTO):
-    if 'carrito' not in session:
-        session['carrito'] = []
-
-    cantidad = int(request.form.get('cantidad', 1))
-
-    # Busca si el producto ya está en el carrito
-    for item in session['carrito']:
-        if item[0] == ID_PRODUCTO:
-            item[1] += cantidad
-            break
+    if 'id_rol' in session:
+        id_rol_u = session['id_rol']
+    if 'id_rol' in session:
+        id_rol = session['id_rol']
+        if 'carrito' not in session:
+            session['carrito'] = []
+    
+        cantidad = int(request.form.get('cantidad', 1))
+    
+        # Busca si el producto ya está en el carrito
+        for item in session['carrito']:
+            if item[0] == ID_PRODUCTO:
+                item[1] += cantidad
+                break
+        else:
+            session['carrito'].append([ID_PRODUCTO, cantidad])
+    
+        flash('Producto(s) agregado(s)', 'success')
+        return redirect(request.referrer)
     else:
-        session['carrito'].append([ID_PRODUCTO, cantidad])
-
-    flash('Producto(s) agregado(s)', 'success')
-    return redirect(url_for('carrito'))
-
+        return redirect(url_for('login'))
+    
 @app.route('/carrito')
 def carrito():
     carrito = []
@@ -1253,23 +1291,25 @@ def buscar_productos():
     valor_busqueda = request.form.get('valor_busqueda')
 
     # Consulta SQL parametrizada
-    query = "SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA WHERE 1=1"
+    query = "SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA"
 
     # Crear un diccionario de parámetros vacío
     params = {}
 
     if campo_busqueda == "nombre_producto" and valor_busqueda:
-        query += " AND nombre_producto LIKE :nombre_producto"
+        query += " WHERE 1=1 AND UPPER(nombre_producto) LIKE UPPER(:nombre_producto)"
         params['nombre_producto'] = f'%{valor_busqueda}%'
-    elif campo_busqueda == "nombre_talla" and valor_busqueda:
-        query += " AND nombre_talla LIKE :nombre_talla"
-        params['nombre_talla'] = f'%{valor_busqueda}%'
     elif campo_busqueda == "nombre_categoria" and valor_busqueda:
-        query += " AND nombre_categoria LIKE :nombre_categoria"
+        query += " WHERE 1=1 AND UPPER(nombre_categoria) LIKE UPPER(:nombre_categoria)"
         params['nombre_categoria'] = f'%{valor_busqueda}%'
+    elif campo_busqueda == "nombre_talla" and valor_busqueda:
+        query += " WHERE 1=1 AND UPPER(nombre_talla) LIKE UPPER(:nombre_talla)"
+        params['nombre_talla'] = f'%{valor_busqueda}%'       
     elif campo_busqueda == "nombre_marca" and valor_busqueda:
-        query += " AND nombre_marca LIKE :nombre_marca"
+        query += " WHERE 1=1 AND UPPER(nombre_marca) LIKE UPPER(:nombre_marca)"
         params['nombre_marca'] = f'%{valor_busqueda}%'
+    elif (campo_busqueda or valor_busqueda) or (campo_busqueda == "nada" and valor_busqueda):
+        query += " ORDER BY P.ID_PRODUCTO DESC"
 
     # Ejecutar la consulta y obtener los resultados
     cursor = connection.cursor()
