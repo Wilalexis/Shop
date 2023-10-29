@@ -1,29 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<style>
-    .hide {
-        position: relative;
-        visibility: hidden;
-    }
-
-    .show {
-        position: relative;
-        visibility: visible;
-    }
-
-    /* .hide::after {
-        color: white;
-        font-family: Arial;
-        font-size: 30px;
-        font-weight: bold;
-        content: "Ventas";
-        position: absolute;
-        visibility: visible;
-        left: 10%;
-        top: -5px;
-    } */
-</style>
 <!-- Formulario de búsqueda -->
 <form id="form-busqueda" class="form-inline">
     <div class="form-group">
@@ -42,7 +19,7 @@
         <button type="button" id="buscar" class="btn btn-outline-primary btn-sm d-inline ml-2">Buscar</button>
     </div>
     <div class="form-group">
-        <a href="{{ url_for('carrito') }}"><i class="fas fa-shopping-cart"></i> Ir a Carrito</a>
+        <a href="{{ url_for('buy_show') }}"><i class="fas fa-shopping-cart"></i> Ir a Carrito</a>
     </div>
 </form>
 <div id="resultado-busqueda">

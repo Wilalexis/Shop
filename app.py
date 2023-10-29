@@ -113,10 +113,42 @@ def dashboard():
     else:
         return redirect(url_for('login'))
 
-
 @app.route('/shoppingcart')  # Ruta para la página de carrito de compras
 def shoppingcart():
     return render_template('shoppingcart.html')
+
+@app.route('/buy_show')
+def buy_show():
+        # Obtén los productos
+        cursor = connection.cursor()
+        cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA ORDER BY P.ID_PRODUCTO DESC")
+        productos = cursor.fetchall()
+        cursor.close()
+
+        # Obtén las tallas
+        cursor1 = connection.cursor()
+        cursor1.execute("SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
+        tallasproductos = cursor1.fetchall()
+        cursor1.close()
+
+        # Obtén las categorías
+        cursor2 = connection.cursor()
+        cursor2.execute(
+            "SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
+        categoriasproductos = cursor2.fetchall()
+        cursor2.close()
+
+        # Obtén las marcas
+        cursor3 = connection.cursor()
+        cursor3.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
+        marcasproductos = cursor3.fetchall()
+        cursor3.close()
+
+        # Obtén el timestamp actual
+        timestamp = int(time.time())
+
+        # Devuelve la plantilla de compras con los datos obtenidos
+        return render_template('buy_show.html', productos=productos, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, timestamp=timestamp)
 
 @app.route('/buy')
 def buy():
@@ -160,22 +192,28 @@ def buy():
 
 @app.route('/agregar_al_carrito/<int:ID_PRODUCTO>', methods=['POST'])
 def agregar_al_carrito(ID_PRODUCTO):
-    if 'carrito' not in session:
-        session['carrito'] = []
-
-    cantidad = int(request.form.get('cantidad', 1))
-
-    # Busca si el producto ya está en el carrito
-    for item in session['carrito']:
-        if item[0] == ID_PRODUCTO:
-            item[1] += cantidad
-            break
+    if 'id_rol' in session:
+        id_rol_u = session['id_rol']
+    if 'id_rol' in session:
+        id_rol = session['id_rol']
+        if 'carrito' not in session:
+            session['carrito'] = []
+    
+        cantidad = int(request.form.get('cantidad', 1))
+    
+        # Busca si el producto ya está en el carrito
+        for item in session['carrito']:
+            if item[0] == ID_PRODUCTO:
+                item[1] += cantidad
+                break
+        else:
+            session['carrito'].append([ID_PRODUCTO, cantidad])
+    
+        flash('Producto(s) agregado(s)', 'success')
+        return redirect(request.referrer)
     else:
-        session['carrito'].append([ID_PRODUCTO, cantidad])
-
-    flash('Producto(s) agregado(s)', 'success')
-    return redirect(url_for('carrito'))
-
+        return redirect(url_for('login'))
+    
 @app.route('/carrito')
 def carrito():
     carrito = []
@@ -349,7 +387,6 @@ def eliminar_categoria(ID_CATEGORIA):
 
     return redirect(url_for('category'))
 
-
 @app.route('/admin/client')
 def client():
     cursor = connection.cursor()
@@ -383,7 +420,6 @@ def client():
 
     return render_template('client.html', clientes=clients_to_display, pagination=pagination, login=login)
 
-
 @app.route('/crear_cliente', methods=['POST'])
 def crear_client():
     nombre = request.form.get('nombre')
@@ -407,7 +443,6 @@ def crear_client():
 
     return redirect(url_for('client'))
 
-
 @app.route('/eliminar_client/<int:ID_CLIENTE>', methods=['POST', 'DELETE'])
 def eliminar_client(ID_CLIENTE):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
@@ -424,7 +459,6 @@ def eliminar_client(ID_CLIENTE):
             cursor.close()
 
     return redirect(url_for('client'))
-
 
 @app.route('/editClient', methods=['POST'])
 def editClient(ID_CLIENTE):
@@ -512,7 +546,6 @@ def editClient(ID_CLIENTE):
             # Redirige a la página de usuarios
             return redirect(url_for('client'))
 
-
 @app.route('/admin/marc')
 def marc():
     cursor = connection.cursor()
@@ -557,7 +590,6 @@ def crear_marca():
     session['mensaje'] = 'Marca agregada correctamente'
 
     return redirect(url_for('marc'))
-
 
 # ruta para editar marcas
 @app.route('/editBrands/<int:ID_MARCA>', methods=['GET', 'POST'])
@@ -635,7 +667,6 @@ def editBrands(ID_MARCA):
             # Redirige a la página de usuarios
             return redirect(url_for('marc'))
 
-
 # ruta para eliminar marcas
 @app.route('/eliminar_marca/<int:ID_MARCA>', methods=['POST', 'DELETE'])
 def eliminar_marca(ID_MARCA):
@@ -653,7 +684,6 @@ def eliminar_marca(ID_MARCA):
             cursor.close()
 
     return redirect(url_for('marc'))
-
 
 @app.route('/admin/sizes')  # Ruta para la pagina de tallas
 def sizes():
@@ -700,7 +730,6 @@ def crear_talla():
     session['mensaje'] = 'talla agregada correctamente'
 
     return redirect(url_for('sizes'))
-
 
 # ruta para editar tallas
 @app.route('/editSizes/<int:ID_TALLA>', methods=['GET', 'POST'])
@@ -779,7 +808,6 @@ def editSizes(ID_TALLA):
             # Redirige a la página de tallas
             return redirect(url_for('sizes'))
 
-
 # ruta para eliminar Tallas
 @app.route('/eliminar_talla/<int:ID_TALLA>', methods=['POST', 'DELETE'])
 def eliminar_talla(ID_TALLA):
@@ -797,7 +825,6 @@ def eliminar_talla(ID_TALLA):
             cursor.close()
 
     return redirect(url_for('sizes'))
-
 
 @app.route('/admin/users')  # Ruta para la página de usuarios
 def users():
@@ -855,7 +882,6 @@ def crear_usuario():
 
     return redirect(url_for('users'))
 
-
 @app.route('/eliminar_usuario/<int:ID_USUARIO>', methods=['POST', 'DELETE'])
 def eliminar_usuario(ID_USUARIO):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
@@ -872,7 +898,6 @@ def eliminar_usuario(ID_USUARIO):
             cursor.close()
 
     return redirect(url_for('users'))
-
 
 @app.route('/buscar_usuarios', methods=['POST'])
 def buscar_usuarios():
@@ -900,7 +925,6 @@ def buscar_usuarios():
 
     # Renderizar la página de resultados de búsqueda con los usuarios encontrados
     return render_template('resultadosBusquedaUsuario.html', usuarios=usuarios_encontrados)
-
 
 @app.route('/editUsers/<int:ID_USUARIO>', methods=['GET', 'POST'])
 def editUsers(ID_USUARIO):
@@ -986,7 +1010,6 @@ def editUsers(ID_USUARIO):
             # Redirige a la página de usuarios
             return redirect(url_for('users'))
 
-
 @app.route('/admin/products')  # Ruta para la página de productos
 def products():
     cursor = connection.cursor()
@@ -1063,7 +1086,6 @@ def crear_producto():
     session['mensaje'] = 'Producto agregado correctamente'
 
     return redirect(url_for('products'))
-
 
 @app.route('/editProducts/<int:ID_PRODUCTO>', methods=['GET', 'POST'])
 def editProducts(ID_PRODUCTO):
@@ -1182,7 +1204,6 @@ def editProducts(ID_PRODUCTO):
             # Redirige a la página de productos
             return redirect(url_for('products'))
 
-
 @app.route('/eliminar_producto/<int:ID_PRODUCTO>', methods=['POST', 'DELETE'])
 def eliminar_producto(ID_PRODUCTO):
     if request.method == 'POST' or request.form.get('_method') == 'DELETE':
@@ -1199,7 +1220,6 @@ def eliminar_producto(ID_PRODUCTO):
             cursor.close()
 
     return redirect(url_for('products'))
-
 
 # Función para registrar un nuevo cliente
 @app.route('/registerUser', methods=['POST'])
@@ -1265,30 +1285,31 @@ def registerUser():
     # Devuelve la plantilla de registro con los valores de los campos y el mensaje
     return render_template('register.html', nombre_cliente=nombre_cliente, direccion=direccion, nit=nit, correo=correo, message=message, message_type=message_type)
 
-
 @app.route('/buscar_productos', methods=['POST'])
 def buscar_productos():
     campo_busqueda = request.form.get('campo_busqueda')
     valor_busqueda = request.form.get('valor_busqueda')
 
     # Consulta SQL parametrizada
-    query = "SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA WHERE 1=1"
+    query = "SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA"
 
     # Crear un diccionario de parámetros vacío
     params = {}
 
     if campo_busqueda == "nombre_producto" and valor_busqueda:
-        query += " AND nombre_producto LIKE :nombre_producto"
+        query += " WHERE 1=1 AND UPPER(nombre_producto) LIKE UPPER(:nombre_producto)"
         params['nombre_producto'] = f'%{valor_busqueda}%'
-    elif campo_busqueda == "nombre_talla" and valor_busqueda:
-        query += " AND nombre_talla LIKE :nombre_talla"
-        params['nombre_talla'] = f'%{valor_busqueda}%'
     elif campo_busqueda == "nombre_categoria" and valor_busqueda:
-        query += " AND nombre_categoria LIKE :nombre_categoria"
+        query += " WHERE 1=1 AND UPPER(nombre_categoria) LIKE UPPER(:nombre_categoria)"
         params['nombre_categoria'] = f'%{valor_busqueda}%'
+    elif campo_busqueda == "nombre_talla" and valor_busqueda:
+        query += " WHERE 1=1 AND UPPER(nombre_talla) LIKE UPPER(:nombre_talla)"
+        params['nombre_talla'] = f'%{valor_busqueda}%'       
     elif campo_busqueda == "nombre_marca" and valor_busqueda:
-        query += " AND nombre_marca LIKE :nombre_marca"
+        query += " WHERE 1=1 AND UPPER(nombre_marca) LIKE UPPER(:nombre_marca)"
         params['nombre_marca'] = f'%{valor_busqueda}%'
+    elif (campo_busqueda or valor_busqueda) or (campo_busqueda == "nada" and valor_busqueda):
+        query += " ORDER BY P.ID_PRODUCTO DESC"
 
     # Ejecutar la consulta y obtener los resultados
     cursor = connection.cursor()
@@ -1330,7 +1351,6 @@ def receipts():
                             css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} recibos')
 
     return render_template('receipts.html', recibos=brandas_to_display, pagination=pagination, clientes=clientes)
-
 
 @app.route('/crear_recibo', methods=['POST'])
 def crear_recibo():
@@ -1379,7 +1399,6 @@ def obtener_detalles_carrito():
                 detalles.append((cantidad, concepto, precio, total))
         return detalles
     return []
-
 
 @app.route('/generar_recibo', methods=['GET', 'POST'])
 def generar_recibo():
@@ -1450,14 +1469,17 @@ def generar_recibo():
 
     # Agregar detalles del carrito al recibo
     y_position = height - 140
+    total_compra = 0
     for detalle in detalles_carrito:
         cantidad, concepto, precio, total = detalle
         p.drawString(10, y_position, str(cantidad))
         p.drawString(120, y_position, concepto)
         p.drawString(250, y_position, str(precio))
         p.drawString(350, y_position, str(total))
+        total_compra += precio * cantidad
         y_position -= 10  # Ajusta la posición vertical
-
+    p.line(10, height - 325, width - 10, height - 325)
+    p.drawString(300, 50, "Total: "+str(total_compra))
     # Guardar el PDF
     p.showPage()
     p.save()
@@ -1469,8 +1491,6 @@ def generar_recibo():
     response.headers['Content-Disposition'] = f'attachment; filename=recibo.pdf'
 
     return response
-
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
