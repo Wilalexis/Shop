@@ -21,8 +21,8 @@ body{
 }
 
 .image-button img {
-    max-width: 100%;
-    height: auto;
+    width: 350px;
+    height: 350px;
     border: 1px solid #ddd;
     border-radius: 5px;
     transition: transform 0.2s ease-in-out;
