@@ -1392,11 +1392,11 @@ def generar_recibo():
     nombre = request.form.get('nombre_cliente')
 
     # Preparar la consulta SQL para insertar el recibo
-    sql_recibo = "INSERT INTO RECIBOS (FECHA_EMISION, ID_CLIENTE, NIT, DIRECCION, NOMBRE) VALUES (:fecha_emision, :id_cliente, :nit, :direccion, :nombre_cliente)"
+    sql_recibo = "INSERT INTO RECIBOS (ID_CLIENTE, NIT, DIRECCION, NOMBRE) VALUES (:id_cliente, :nit, :direccion, :nombre_cliente)"
 
     # Ejecutar la consulta para insertar el recibo
     cursor = connection.cursor()
-    cursor.execute(sql_recibo, {'fecha_emision': fecha_hoy, 'id_cliente': id_cliente, 'nit': nit, 'direccion': direccion, 'nombre_cliente': nombre})
+    cursor.execute(sql_recibo, {'id_cliente': id_cliente, 'nit': nit, 'direccion': direccion, 'nombre_cliente': nombre})
     connection.commit()
 
     # Obtener el ID del recibo recién insertado
@@ -1473,4 +1473,4 @@ def generar_recibo():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=80)
