@@ -387,9 +387,6 @@ def client():
     else:
         return redirect(url_for('login'))
     
-    
-
-
 @app.route('/crear_cliente', methods=['POST'])
 def crear_client():
     nombre = request.form.get('nombre')
@@ -521,34 +518,39 @@ def editClient(ID_CLIENTE):
 
 @app.route('/admin/marc')
 def marc():
-    cursor = connection.cursor()
-    cursor.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
-    marcas = cursor.fetchall()
-    cursor.close()
+    # Verifica si el usuario tiene una sesión válida y el rol correcto
+    if 'id_rol' in session:
+        id_rol_u = session['id_rol']
+    if 'id_rol' in session:
+        id_rol = session['id_rol']
+        cursor = connection.cursor()
+        cursor.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
+        marcas = cursor.fetchall()
+        cursor.close()
 
-    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
-    page = request.args.get('page', type=int, default=1)
-    per_page = request.args.get('per_page', type=int, default=5)
+        # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+        page = request.args.get('page', type=int, default=1)
+        per_page = request.args.get('per_page', type=int, default=5)
 
-    # Supongamos que tienes una lista de usuarios llamada 'marcas'
-    total_brands = len(marcas)
+        # Supongamos que tienes una lista de usuarios llamada 'marcas'
+        total_brands = len(marcas)
 
-    # Calcula el índice de inicio y final para la página actual
-    start = (page - 1) * per_page
-    end = start + per_page
+        # Calcula el índice de inicio y final para la página actual
+        start = (page - 1) * per_page
+        end = start + per_page
 
-    # obtiene las marcas actuales
-    brandas_to_display = marcas[start:end]
+        # obtiene las marcas actuales
+        brandas_to_display = marcas[start:end]
 
-    # Crea un objeto de paginación
-    pagination = Pagination(page=page, per_page=per_page, total=total_brands,
-                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} marcas')
+        # Crea un objeto de paginación
+        pagination = Pagination(page=page, per_page=per_page, total=total_brands,
+                                css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} marcas')
 
-    return render_template('marc.html', marcas=brandas_to_display, pagination=pagination)
+        return render_template('marc.html', marcas=brandas_to_display, pagination=pagination)
 
-# Ruta para insertar a Oracle los datos de marcas
-
-
+    else:
+        return redirect(url_for('login'))
+    
 @app.route('/crear_marca', methods=['POST'])
 def crear_marca():
     nombre_marca = request.form.get('nombre_marca')
@@ -665,34 +667,40 @@ def eliminar_marca(ID_MARCA):
 
 @app.route('/admin/sizes')  # Ruta para la pagina de tallas
 def sizes():
-    cursor = connection.cursor()
-    cursor.execute(
-        "SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
-    tallas = cursor.fetchall()
-    cursor.close()
+    # Verifica si el usuario tiene una sesión válida y el rol correcto
+    if 'id_rol' in session:
+        id_rol_u = session['id_rol']
+    if 'id_rol' in session:
+        id_rol = session['id_rol']
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
+        tallas = cursor.fetchall()
+        cursor.close()
 
-    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
-    page = request.args.get('page', type=int, default=1)
-    per_page = request.args.get('per_page', type=int, default=5)
+        # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+        page = request.args.get('page', type=int, default=1)
+        per_page = request.args.get('per_page', type=int, default=5)
 
-    # Supongamos que tienes una lista de tallas llamada 'tallas'
-    total_sizes = len(tallas)
+        # Supongamos que tienes una lista de tallas llamada 'tallas'
+        total_sizes = len(tallas)
 
-    # Calcula el índice de inicio y final para la página actual
-    start = (page - 1) * per_page
-    end = start + per_page
+        # Calcula el índice de inicio y final para la página actual
+        start = (page - 1) * per_page
+        end = start + per_page
 
-    # obtiene las categorias actuales
-    sizes_to_display = tallas[start:end]
+        # obtiene las categorias actuales
+        sizes_to_display = tallas[start:end]
 
-    # Crea un objeto de paginación
-    pagination = Pagination(page=page, per_page=per_page, total=total_sizes,
-                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} tallas')
+        # Crea un objeto de paginación
+        pagination = Pagination(page=page, per_page=per_page, total=total_sizes,
+                                css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} tallas')
 
-    return render_template('sizes.html', tallas=sizes_to_display, pagination=pagination)
+        return render_template('sizes.html', tallas=sizes_to_display, pagination=pagination)
+    else:
+        return redirect(url_for('login'))
 
 # Ruta para insertar a Oracle los datos de tallas
-
 
 @app.route('/crear_talla', methods=['POST'])
 def crear_talla():
@@ -811,40 +819,46 @@ def eliminar_talla(ID_TALLA):
 
 @app.route('/admin/users')  # Ruta para la página de usuarios
 def users():
-    cursor = connection.cursor()
-    cursor.execute(
-        "SELECT U.ID_USUARIO, U.NOMBRE, U.CORREO, U.CONTRASENA, R.NOMBRE_ROL FROM USUARIOS U JOIN ROLES R ON U.ID_ROL = R.ID_ROL")
-    usuarios = cursor.fetchall()
-    cursor.close()
+    # Verifica si el usuario tiene una sesión válida y el rol correcto
+    if 'id_rol' in session:
+        id_rol_u = session['id_rol']
+    if 'id_rol' in session:
+        id_rol = session['id_rol']
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT U.ID_USUARIO, U.NOMBRE, U.CORREO, U.CONTRASENA, R.NOMBRE FROM USUARIOS U JOIN ROLES R ON U.ID_ROL = R.ID_ROL")
+        usuarios = cursor.fetchall()
+        cursor.close()
 
-    cursor1 = connection.cursor()
-    cursor1.execute("SELECT ID_ROL, NOMBRE_ROL FROM ROLES")
-    roles = cursor1.fetchall()
-    cursor1.close()
+        cursor1 = connection.cursor()
+        cursor1.execute("SELECT ID_ROL, NOMBRE FROM ROLES")
+        roles = cursor1.fetchall()
+        cursor1.close()
 
-    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
-    page = request.args.get('page', type=int, default=1)
-    per_page = request.args.get('per_page', type=int, default=5)
+        # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+        page = request.args.get('page', type=int, default=1)
+        per_page = request.args.get('per_page', type=int, default=5)
 
-    # Supongamos que tienes una lista de usuarios llamada 'usuarios'
-    total_users = len(usuarios)
+        # Supongamos que tienes una lista de usuarios llamada 'usuarios'
+        total_users = len(usuarios)
 
-    # Calcula el índice de inicio y final para la página actual
-    start = (page - 1) * per_page
-    end = start + per_page
+        # Calcula el índice de inicio y final para la página actual
+        start = (page - 1) * per_page
+        end = start + per_page
 
-    # Obtiene los usuarios para la página actual
-    users_to_display = usuarios[start:end]
+        # Obtiene los usuarios para la página actual
+        users_to_display = usuarios[start:end]
 
-    # Crea un objeto de paginación
+        # Crea un objeto de paginación
 
-    pagination = Pagination(page=page, per_page=per_page, total=total_users,
-                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} categoria')
+        pagination = Pagination(page=page, per_page=per_page, total=total_users,
+                                css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} categoria')
 
-    return render_template('users.html', usuarios=users_to_display, pagination=pagination, roles=roles)
-
+        return render_template('users.html', usuarios=users_to_display, pagination=pagination, roles=roles)
+    else:
+        return redirect(url_for('login'))
+    
 # Ruta para insertar a Oracle los datos de usuario
-
 
 @app.route('/crear_usuario', methods=['POST'])
 def crear_usuario():
@@ -1001,45 +1015,52 @@ def editUsers(ID_USUARIO):
 
 @app.route('/admin/products')  # Ruta para la página de productos
 def products():
-    cursor = connection.cursor()
-    cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA ORDER BY P.ID_PRODUCTO DESC")
-    productos = cursor.fetchall()
-    cursor.close()
+    # Verifica si el usuario tiene una sesión válida y el rol correcto
+    if 'id_rol' in session:
+        id_rol_u = session['id_rol']
+    if 'id_rol' in session:
+        id_rol = session['id_rol']
+        cursor = connection.cursor()
+        cursor.execute("SELECT P.ID_PRODUCTO, P.NOMBRE_PRODUCTO, P.DESCRIPCION, T.NOMBRE_TALLA, C.NOMBRE_CATEGORIA, M.NOMBRE_MARCA, P.PRECIO, P.EXISTENCIA, P.IMAGEN FROM productos P JOIN TALLAS T ON P.ID_TALLA = T.ID_TALLA JOIN CATEGORIAS C ON P.ID_CATEGORIA = C.ID_CATEGORIA JOIN MARCAS M ON P.ID_MARCA = M.ID_MARCA ORDER BY P.ID_PRODUCTO DESC")
+        productos = cursor.fetchall()
+        cursor.close()
 
-    cursor1 = connection.cursor()
-    cursor1.execute("SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
-    tallasproductos = cursor1.fetchall()
-    cursor1.close()
+        cursor1 = connection.cursor()
+        cursor1.execute("SELECT ID_TALLA, NOMBRE_TALLA FROM TALLAS")
+        tallasproductos = cursor1.fetchall()
+        cursor1.close()
 
-    cursor2 = connection.cursor()
-    cursor2.execute("SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
-    categoriasproductos = cursor2.fetchall()
-    cursor2.close()
+        cursor2 = connection.cursor()
+        cursor2.execute("SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
+        categoriasproductos = cursor2.fetchall()
+        cursor2.close()
 
-    cursor3 = connection.cursor()
-    cursor3.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
-    marcasproductos = cursor3.fetchall()
-    cursor3.close()
+        cursor3 = connection.cursor()
+        cursor3.execute("SELECT ID_MARCA, NOMBRE_MARCA FROM MARCAS")
+        marcasproductos = cursor3.fetchall()
+        cursor3.close()
 
-    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
-    page = request.args.get('page', type=int, default=1)
-    per_page = request.args.get('per_page', type=int, default=5)
+        # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+        page = request.args.get('page', type=int, default=1)
+        per_page = request.args.get('per_page', type=int, default=5)
 
-    # Supongamos que tienes una lista de productos llamada 'productos'
-    total_products = len(productos)
+        # Supongamos que tienes una lista de productos llamada 'productos'
+        total_products = len(productos)
 
-    # Calcula el índice de inicio y final para la página actual
-    start = (page - 1) * per_page
-    end = start + per_page
+        # Calcula el índice de inicio y final para la página actual
+        start = (page - 1) * per_page
+        end = start + per_page
 
-    # Obtiene los productos para la página actual
-    products_to_display = productos[start:end]
+        # Obtiene los productos para la página actual
+        products_to_display = productos[start:end]
 
-    # Crea un objeto de paginación
-    pagination = Pagination(page=page, per_page=per_page, total=total_products,
-                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} productos')
+        # Crea un objeto de paginación
+        pagination = Pagination(page=page, per_page=per_page, total=total_products,
+                                css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} productos')
 
-    return render_template('products.html', productos=products_to_display, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, pagination=pagination)
+        return render_template('products.html', productos=products_to_display, tallasproductos=tallasproductos, categoriasproductos=categoriasproductos, marcasproductos=marcasproductos, pagination=pagination)
+    else:
+        return redirect(url_for('login'))
 
 # Ruta para insertar a Oracle los datos del producto
 @app.route('/crear_producto', methods=['POST'])
