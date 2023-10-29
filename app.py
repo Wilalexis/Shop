@@ -198,31 +198,40 @@ def quitar(ID_PRODUCTO):
 
 @app.route('/admin/category')  # ruta para la pagina categorias
 def category():
-    cursor = connection.cursor()
-    cursor.execute(
-        "SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
-    categorias = cursor.fetchall()
-    cursor.close()
+    
+    # Verifica si el usuario tiene una sesión válida y el rol correcto
+    if 'id_rol' in session:
+        id_rol_u = session['id_rol']
+    if 'id_rol' in session:
+        id_rol = session['id_rol']
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT ID_CATEGORIA, NOMBRE_CATEGORIA FROM CATEGORIAS")
+        categorias = cursor.fetchall()
+        cursor.close()
 
-    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
-    page = request.args.get('page', type=int, default=1)
-    per_page = request.args.get('per_page', type=int, default=5)
+        # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+        page = request.args.get('page', type=int, default=1)
+        per_page = request.args.get('per_page', type=int, default=5)
 
-    # Supongamos que tienes una lista de categorias llamada 'categorias'
-    total_category = len(categorias)
+        # Supongamos que tienes una lista de categorias llamada 'categorias'
+        total_category = len(categorias)
 
-    # Calcula el índice de inicio y final para la página actual
-    start = (page - 1) * per_page
-    end = start + per_page
+        # Calcula el índice de inicio y final para la página actual
+        start = (page - 1) * per_page
+        end = start + per_page
 
-    # obtiene las categorias actuales
-    category_to_display = categorias[start:end]
+        # obtiene las categorias actuales
+        category_to_display = categorias[start:end]
 
-    # Crea un objeto de paginación
-    pagination = Pagination(page=page, per_page=per_page, total=total_category,
-                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} categorias')
+        # Crea un objeto de paginación
+        pagination = Pagination(page=page, per_page=per_page, total=total_category,
+                                css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} categorias')
 
-    return render_template('category.html', categorias=category_to_display, pagination=pagination)
+        return render_template('category.html', categorias=category_to_display, pagination=pagination)
+    else:
+        return redirect(url_for('login'))
+
 
 # Ruta para insertar a Oracle los datos de categoría
 @app.route('/crear_categoria', methods=['POST'])
@@ -340,36 +349,45 @@ def eliminar_categoria(ID_CATEGORIA):
 
 @app.route('/admin/client')
 def client():
-    cursor = connection.cursor()
-    cursor.execute("SELECT clientes.id_cliente,clientes.nombre_cliente,clientes.direccion,clientes.nit,clientes.correo,login.contrasena FROM clientes INNER JOIN login ON clientes.id_login = login.id_login")
-    #cursor.execute("SELECT U.ID_CLIENTE, U.NOMBRE_CLIENTE, U.DIRECCION, U.NIT, U.CORREO, U.ID_LOGIN FROM CLIENTES U JOIN LOGIN R ON U.ID_LOGIN = R.ID_LOGIN")
-    clientes = cursor.fetchall()
-    cursor.close()
+    # Verifica si el usuario tiene una sesión válida y el rol correcto
+    if 'id_rol' in session:
+        id_rol_u = session['id_rol']
+    if 'id_rol' in session:
+        id_rol = session['id_rol']
+        cursor = connection.cursor()
+        cursor.execute("SELECT clientes.id_cliente,clientes.nombre_cliente,clientes.direccion,clientes.nit,clientes.correo,login.contrasena FROM clientes INNER JOIN login ON clientes.id_login = login.id_login")
+        #cursor.execute("SELECT U.ID_CLIENTE, U.NOMBRE_CLIENTE, U.DIRECCION, U.NIT, U.CORREO, U.ID_LOGIN FROM CLIENTES U JOIN LOGIN R ON U.ID_LOGIN = R.ID_LOGIN")
+        clientes = cursor.fetchall()
+        cursor.close()
 
-    cursor1 = connection.cursor()
-    cursor1.execute("SELECT ID_LOGIN, CONTRASENA FROM LOGIN")
-    login = cursor1.fetchall()
-    cursor1.close()
+        cursor1 = connection.cursor()
+        cursor1.execute("SELECT ID_LOGIN, CONTRASENA FROM LOGIN")
+        login = cursor1.fetchall()
+        cursor1.close()
 
-    # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
-    page = request.args.get('page', type=int, default=1)
-    per_page = request.args.get('per_page', type=int, default=5)
+        # Verificar si los parámetros 'page' y 'per_page' se pasan en la solicitud GET
+        page = request.args.get('page', type=int, default=1)
+        per_page = request.args.get('per_page', type=int, default=5)
 
-    # Supongamos que tienes una lista de clientes llamada 'clientes'
-    total_clients = len(clientes)
+        # Supongamos que tienes una lista de clientes llamada 'clientes'
+        total_clients = len(clientes)
 
-    # Calcula el índice de inicio y final para la página actual
-    start = (page - 1) * per_page
-    end = start + per_page
+        # Calcula el índice de inicio y final para la página actual
+        start = (page - 1) * per_page
+        end = start + per_page
 
-    # obtiene las clientes actuales
-    clients_to_display = clientes[start:end]
+        # obtiene las clientes actuales
+        clients_to_display = clientes[start:end]
 
-    # Crea un objeto de paginación
-    pagination = Pagination(page=page, per_page=per_page, total=total_clients,
-                            css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} clientes')
+        # Crea un objeto de paginación
+        pagination = Pagination(page=page, per_page=per_page, total=total_clients,
+                                css_framework='bootstrap4', display_msg='Mostrando {start} - {end} de {total} clientes')
 
-    return render_template('client.html', clientes=clients_to_display, pagination=pagination, login=login)
+        return render_template('client.html', clientes=clients_to_display, pagination=pagination, login=login)
+    else:
+        return redirect(url_for('login'))
+    
+    
 
 
 @app.route('/crear_cliente', methods=['POST'])
