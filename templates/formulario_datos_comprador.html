@@ -1,6 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .hide {
+        position: relative;
+        visibility: hidden;
+    }
+
+    .show {
+        position: relative;
+        visibility: visible;
+    }
+
+    /* .hide::after {
+        color: white;
+        font-family: Arial;
+        font-size: 30px;
+        font-weight: bold;
+        content: "Ventas";
+        position: absolute;
+        visibility: visible;
+        left: 10%;
+        top: -5px;
+    } */
+</style>
 <div class="container-cliente">
     <form method="POST" action="{{url_for('generar_recibo')}}">
         <h2>Ingrese sus datos para el envío</h2><br>
@@ -25,7 +48,14 @@
             <label for="nombre_comprador">Direccion de envío exacto:</label>
             <input type="text" id="direccion_envio" name="direccion_envio" autocomplete="off" required>
         </div>
-        <button type="submit" class="btn btn-primary btnComprador">Enviar</button>
+        <div class="form-group1">
+            <button type="submit" class="btn btn-primary btnComprador">Enviar</button>
+        </div>
+        <br>
+        <div class="form-group1">
+            <a href="/buy" class="btn-compra">Seguir comprando</a>
+        </div>
     </form>
+
 </div>
 {% endblock %}

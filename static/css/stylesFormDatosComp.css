@@ -1,12 +1,13 @@
 body {
     font-family: sans-serif;
     font-size: 16px;
+    overflow-y: scroll !important;
   }
 
   .container-cliente {
     display: flex;
     flex-direction: column;
-    width: 500px;
+    width: 450px;
     margin: 0 auto;
     padding: 20px;
     background-color: #fff;

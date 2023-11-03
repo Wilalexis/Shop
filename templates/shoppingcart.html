@@ -1,7 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .hide {
+        position: relative;
+        visibility: hidden;
+    }
 
+    .show {
+        position: relative;
+        visibility: visible;
+    }
+
+    /* .hide::after {
+        color: white;
+        font-family: Arial;
+        font-size: 30px;
+        font-weight: bold;
+        content: "Ventas";
+        position: absolute;
+        visibility: visible;
+        left: 10%;
+        top: -5px;
+    } */
+</style>
 <h1>Carrito de Compras</h1>
 <div class="container">
     {% if carrito %}
